@@ -10,11 +10,10 @@ module.exports = new MessageCommand({
         aliases: []
     },
     options: {
-            botDevelopers: true
+        botDevelopers: true
     },
 
     /**
-     * 
      * @param {DiscordBot} client 
      * @param {Message} message 
      * @param {string[]} args
@@ -24,7 +23,16 @@ module.exports = new MessageCommand({
 
         if (!kata) {
             return message.reply({
-                content: 'Format salah. Contoh: `jjhapus ngab`'
+                embeds: [{
+                    color: 0xF04747,
+                    title: '❌ Format Salah',
+                    description: 'Gunakan format seperti ini:\n`jjhapus ngab`',
+                    footer: {
+                        text: `Diminta oleh ${message.author.username}`,
+                        icon_url: message.author.displayAvatarURL({ dynamic: true })
+                    },
+                    timestamp: new Date()
+                }]
             });
         }
 
@@ -32,15 +40,39 @@ module.exports = new MessageCommand({
 
         if (!kamus[kata]) {
             return message.reply({
-                content: `Kata **${kata}** tidak ditemukan di kamus.`
+                embeds: [{
+                    color: 0xFAA61A,
+                    title: '⚠️ Kata Tidak Ditemukan',
+                    description: `Kata **${kata}** tidak tersedia di kamus.`,
+                    footer: {
+                        text: `Diminta oleh ${message.author.username}`,
+                        icon_url: message.author.displayAvatarURL({ dynamic: true })
+                    },
+                    timestamp: new Date()
+                }]
             });
         }
 
         delete kamus[kata];
         saveDictionary(kamus);
 
-        return message.reply({
-            content: `Kata **${kata}** berhasil dihapus dari kamus.`
+        const replyMessage = await message.reply({
+            embeds: [{
+                color: 0x43B581,
+                title: '✅ Kata Dihapus',
+                description: `Kata **${kata}** berhasil dihapus dari kamus.`,
+                footer: {
+                    text: `Diminta oleh ${message.author.username}`,
+                    icon_url: message.author.displayAvatarURL({ dynamic: true })
+                },
+                timestamp: new Date()
+            }]
         });
+
+        // Hapus command & respon dalam 10 detik
+        setTimeout(() => {
+            message.delete().catch(() => {});
+            replyMessage.delete().catch(() => {});
+        }, 10000);
     }
 }).toJSON();
