@@ -21,7 +21,7 @@ module.exports = new MessageCommand({
         const targetChannel = message.channel;
 
         await targetChannel.send({
-            content: `\n\n**Selamat pagi teman-teman Jije ✨**\nSemoga harimu dimulai dengan senyuman dan semangat positif!\n\nHari ini aku mau mengumumkan bahwa bot <@1377175797227327629> sudah resmi hadir untuk membantu menjaga dan meramaikan server kita tercinta ini. 🥰\n\nSaat ini memang fiturnya masih terbatas, tapi seiring waktu semoga aku bisa terus berkembang dan memberikan manfaat sebanyak mungkin.\n\nTolong digunakan dengan bijak ya, karena semua fitur dibuat untuk membantu dan menyenangkan kalian, bukan sebaliknya 💖`,
+            content: `@everyone\n\n**Selamat pagi teman-teman Jije ✨**\nSemoga harimu dimulai dengan senyuman dan semangat positif!\n\nSelamat Hari Senin.\n\nHari ini aku mau mengumumkan bahwa aku <@1377175797227327629> sudah resmi hadir untuk membantu menjaga dan meramaikan server kita ini. 🥰\n\nSaat ini memang fiturnya masih terbatas, tapi seiring waktu semoga aku bisa terus berkembang biak dan memberikan manfaat sebanyak mungkin.\n\nTolong digunakan dengan bijak ya, karena semua fitur dibuat untuk membantu dan menyenangkan kalian, bukan sebaliknya 💖 maaf kalo banyak salah namanya juga bot tempatnya hilaf 😔`,
             embeds: [
                 {
                     color: 0xFF69B4,
