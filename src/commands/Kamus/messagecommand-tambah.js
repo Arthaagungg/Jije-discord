@@ -10,11 +10,10 @@ module.exports = new MessageCommand({
         aliases: []
     },
     options: {
-            botDevelopers: true
+        botDevelopers: true
     },
 
     /**
-     * 
      * @param {DiscordBot} client 
      * @param {Message} message 
      * @param {string[]} args
@@ -27,7 +26,16 @@ module.exports = new MessageCommand({
 
         if (!kataMatch || !artiMatch) {
             return message.reply({
-                content: 'Format salah. Contoh: `jjtambah kata=ngab arti=sapaan khas anak jaksel`'
+                embeds: [{
+                    color: 0xF04747,
+                    title: '❌ Format Salah',
+                    description: 'Gunakan format seperti ini:\n`jjtambah kata=ngab arti=sapaan khas anak jaksel`',
+                    footer: {
+                        text: `Diminta oleh ${message.author.username}`,
+                        icon_url: message.author.displayAvatarURL({ dynamic: true })
+                    },
+                    timestamp: new Date()
+                }]
             });
         }
 
@@ -38,15 +46,39 @@ module.exports = new MessageCommand({
 
         if (kamus[kata]) {
             return message.reply({
-                content: `Kata **${kata}** sudah ada di kamus.`
+                embeds: [{
+                    color: 0xFAA61A,
+                    title: '⚠️ Kata Sudah Ada',
+                    description: `Kata **${kata}** sudah tersedia di kamus.`,
+                    footer: {
+                        text: `Diminta oleh ${message.author.username}`,
+                        icon_url: message.author.displayAvatarURL({ dynamic: true })
+                    },
+                    timestamp: new Date()
+                }]
             });
         }
 
         kamus[kata] = arti;
         saveDictionary(kamus);
 
-        return message.reply({
-            content: `Kata **${kata}** berhasil ditambahkan dengan arti: _${arti}_`
+        const replyMessage = await message.reply({
+            embeds: [{
+                color: 0x43B581,
+                title: '✅ Kata Ditambahkan',
+                description: `**${kata}** berhasil ditambahkan ke kamus!\n\n**Arti:** _${arti}_`,
+                footer: {
+                    text: `Diminta oleh ${message.author.username}`,
+                    icon_url: message.author.displayAvatarURL({ dynamic: true })
+                },
+                timestamp: new Date()
+            }]
         });
+
+        // Hapus command & balasan setelah 10 detik
+        setTimeout(() => {
+            message.delete().catch(() => {});
+            replyMessage.delete().catch(() => {});
+        }, 10000);
     }
 }).toJSON();
