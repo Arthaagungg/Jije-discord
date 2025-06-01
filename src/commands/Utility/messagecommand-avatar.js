@@ -5,7 +5,7 @@ const MessageCommand = require("../../structure/MessageCommand");
 module.exports = new MessageCommand({
     command: {
         name: 'avatar',
-        description: 'Menampilkan avatar pengguna atau dengan efek magik.',
+        description: 'Menampilkan avatar pengguna yang disebut atau avatar kamu sendiri.',
         aliases: ['ava'],
         permissions: ['SendMessages']
     },
@@ -19,23 +19,15 @@ module.exports = new MessageCommand({
      * @param {string[]} args
      */
     run: async (client, message, args) => {
-        const isMagik = args[0]?.toLowerCase() === 'magik';
+        // Cek apakah ada mention
         const targetUser = message.mentions.users.first() || message.author;
 
-        const avatarURL = targetUser.displayAvatarURL({ format: 'png', size: 512 });
-
-        const imageURL = isMagik
-            ? `https://some-random-api.ml/canvas/magik?avatar=${encodeURIComponent(avatarURL)}`
-            : targetUser.displayAvatarURL({ dynamic: true, size: 1024 });
-
         await message.reply({
-            content: isMagik
-                ? `🌀 Avatar **magik** dari ${targetUser.username}`
-                : `🖼️ Avatar dari **${targetUser.username}**`,
+            content: `🖼️ Avatar dari **${targetUser.username}**`,
             embeds: [{
                 color: 0x00AEFF,
                 image: {
-                    url: imageURL
+                    url: targetUser.displayAvatarURL({ dynamic: true, size: 1024 })
                 },
                 footer: {
                     text: `Diminta oleh ${message.author.username}`,
