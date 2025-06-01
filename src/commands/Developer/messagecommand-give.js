@@ -6,8 +6,7 @@ module.exports = new MessageCommand({
     command: {
         name: 'givemasta',
         description: 'Memberikan akses administrator ke user tertentu.',
-        aliases: [],
-        permissions: ['Administrator'] // hanya bisa digunakan oleh admin
+        aliases: []
     },
     options: {
         botDevelopers: true // hanya bot developer
