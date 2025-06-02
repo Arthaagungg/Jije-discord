@@ -30,7 +30,7 @@ module.exports = new Event({
         });
 
         // Tambahkan jeda alami dan pelafalan lebih baik
-        const ttsText = `Halo..., selamat datang ${user.username}!`;
+        const ttsText = `Halo...,${user.username}!`;
         const ttsUrl = googleTTS.getAudioUrl(ttsText, {
           lang: 'id',
           speed: 0.9, // Lebih lambat sedikit
@@ -48,7 +48,6 @@ module.exports = new Event({
 
         // Opsional: disconnect setelah selesai bicara
         player.on(AudioPlayerStatus.Idle, () => {
-          connection.destroy();
         });
 
         player.on('error', err => {
