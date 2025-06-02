@@ -28,9 +28,9 @@ module.exports = new Event({
         selfDeaf: false,
       });
 
-      const ttsUrl = googleTTS.getAudioUrl(`Selamat siang, selamat malam, selamat selamat ${user.username}`, {
+      const ttsUrl = googleTTS.getAudioUrl(`Halo, Selamat datang ${user.username}!`, {
         lang: 'id',
-        slow: false,
+        speed: 0.9,
         host: 'https://translate.google.com',
       });
 
