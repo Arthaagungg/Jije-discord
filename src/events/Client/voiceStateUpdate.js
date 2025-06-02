@@ -30,7 +30,7 @@ module.exports = new Event({
 
       const ttsUrl = googleTTS.getAudioUrl(`Halo, Selamat datang ${user.username}!`, {
         lang: 'id',
-        speed: 0.7,
+        speed: 0.4,
         host: 'https://translate.google.com',
       });
 
