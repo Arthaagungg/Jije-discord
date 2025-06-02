@@ -41,7 +41,6 @@ module.exports = new Event({
       player.play(resource);
 
       player.on(AudioPlayerStatus.Idle, () => {
-        connection.destroy(); // keluar setelah bicara
       });
 
       player.on('error', err => {
