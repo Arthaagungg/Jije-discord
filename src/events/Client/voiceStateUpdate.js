@@ -32,7 +32,7 @@ module.exports = new Event({
         // Tambahkan jeda alami dan pelafalan lebih baik
         const ttsText = `Halo..., ${newState.member.displayName}!`;
         const ttsUrl = googleTTS.getAudioUrl(ttsText, {
-          lang: 'ar',
+          lang: 'id',
           speed: 0.9, // Lebih lambat sedikit
           host: 'https://translate.google.com',
         });
