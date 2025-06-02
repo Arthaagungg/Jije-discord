@@ -1,6 +1,6 @@
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 const googleTTS = require('google-tts-api');
-const Event = require('../../structure/Event'); // Sesuaikan path kalau berbeda
+const Event = require('../../structure/Event');
 
 module.exports = new Event({
   event: 'voiceStateUpdate',
@@ -15,38 +15,50 @@ module.exports = new Event({
     const user = newState.member?.user;
     const guild = newState.guild;
 
-    // Cek kalau user masuk ke VC target dan bukan bot
+    // Cek jika user masuk ke VC target dan bukan bot
     if (
       newState.channelId === targetChannelId &&
       oldState.channelId !== targetChannelId &&
       !user?.bot
     ) {
-      const connection = joinVoiceChannel({
-        channelId: targetChannelId,
-        guildId: guild.id,
-        adapterCreator: guild.voiceAdapterCreator,
-        selfDeaf: false,
-      });
+      try {
+        const connection = joinVoiceChannel({
+          channelId: targetChannelId,
+          guildId: guild.id,
+          adapterCreator: guild.voiceAdapterCreator,
+          selfDeaf: false,
+        });
 
-      const ttsUrl = googleTTS.getAudioUrl(`Halo, Selamat datang ${user.username}!`, {
-        lang: 'id',
-        speed: 0.4,
-        host: 'https://translate.google.com',
-      });
+        // Tambahkan jeda alami dan pelafalan lebih baik
+        const ttsText = `Halo..., selamat datang ${user.username}!`;
+        const ttsUrl = googleTTS.getAudioUrl(ttsText, {
+          lang: 'id',
+          speed: 0.9, // Lebih lambat sedikit
+          host: 'https://translate.google.com',
+        });
 
-      const player = createAudioPlayer();
-      const resource = createAudioResource(ttsUrl);
+        const player = createAudioPlayer();
+        const resource = createAudioResource(ttsUrl);
+        connection.subscribe(player);
 
-      connection.subscribe(player);
-      player.play(resource);
+        // Tunggu 2 detik sebelum bicara
+        setTimeout(() => {
+          player.play(resource);
+        }, 2000);
 
-      player.on(AudioPlayerStatus.Idle, () => {
-      });
+        // Opsional: disconnect setelah selesai bicara
+        player.on(AudioPlayerStatus.Idle, () => {
+          connection.destroy();
+        });
 
-      player.on('error', err => {
-        console.error('Player error:', err);
-        connection.destroy();
-      });
+        player.on('error', err => {
+          console.error('❌ Player error:', err);
+          connection.destroy();
+        });
+
+      } catch (err) {
+        console.error('❌ Voice join/playback error:', err);
+      }
     }
   }
 }).toJSON();
