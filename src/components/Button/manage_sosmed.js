@@ -6,7 +6,9 @@ module.exports = new Component({
     customId: /^sosmed_manage_(\d+)$/,
     
     /**
-     * @param {import("discord.js").ButtonInteraction} interaction 
+     * 
+     * @param {DiscordBot} client 
+     * @param {ButtonInteraction} interaction 
      */
     execute: async (interaction) => {
         const [, targetUserId] = interaction.customId.match(/^sosmed_manage_(\d+)$/);
