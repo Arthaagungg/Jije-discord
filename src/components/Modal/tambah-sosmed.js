@@ -5,7 +5,9 @@ const {
   ActionRowBuilder,
 } = require("discord.js");
 
-module.exports = {
+const Component = require("../../structure/Component");
+
+module.exports = new Component({
   customId: "tambah-sosmed",
   type: "button",
   run: async (interaction) => {
@@ -32,4 +34,4 @@ module.exports = {
 
     await interaction.showModal(modal);
   },
-};
+}).toJSON();
