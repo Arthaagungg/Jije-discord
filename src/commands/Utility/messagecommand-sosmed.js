@@ -49,8 +49,8 @@ module.exports = new MessageCommand({
     if (isSelf) {
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-          .setCustomId(`sosmed-manage-${message.author.id}`)
-          .setLabel("Kelola Sosmed")
+          .setCustomId("sosmed-manage")
+        .setLabel("Kelola Sosmed")
           .setStyle(ButtonStyle.Primary)
       );
       components.push(row);
