@@ -1,9 +1,11 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { getUserSocials } = require("../../Handlers/socialsHandler");
 
-module.exports = {
+const DiscordBot = require("../../client/DiscordBot");
+const MessageCommand = require("../../structure/MessageCommand");
+
+module.exports = new MessageCommand({
     name: "sosmed",
-    messageCommand: true,
 
     async run({ message }) {
         const user = message.mentions.users.first() || message.author;
@@ -39,4 +41,4 @@ module.exports = {
             components,
         });
     }
-}
+}).toJSON();
