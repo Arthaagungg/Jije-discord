@@ -1,4 +1,9 @@
-const { ButtonInteraction, MessageActionRow, MessageSelectMenu } = require("discord.js");
+const {
+    ButtonInteraction,
+    ActionRowBuilder,
+    StringSelectMenuBuilder,
+    ComponentType
+} = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
 
@@ -12,18 +17,20 @@ module.exports = new Component({
      */
     run: async (client, interaction) => {
         // Cegah orang lain klik tombol yang bukan miliknya
-        if (interaction.user.id !== interaction.message.interaction?.user?.id &&
-            interaction.user.id !== interaction.message.mentions?.users?.first()?.id &&
-            interaction.user.id !== interaction.message.author?.id
-        ) {
+        const messageUserId =
+            interaction.message.interaction?.user?.id ||
+            interaction.message.mentions?.users?.first()?.id ||
+            interaction.message.author?.id;
+
+        if (interaction.user.id !== messageUserId) {
             return interaction.reply({
                 content: '❌ Kamu tidak bisa mengelola sosial media milik orang lain.',
                 ephemeral: true
             });
         }
 
-        const row = new MessageActionRow().addComponents(
-            new MessageSelectMenu()
+        const row = new ActionRowBuilder().addComponents(
+            new StringSelectMenuBuilder()
                 .setCustomId('sosmed_select')
                 .setPlaceholder('Pilih aksi yang ingin dilakukan')
                 .addOptions([
@@ -31,7 +38,7 @@ module.exports = new Component({
                         label: 'Tambah Sosial Media',
                         description: 'Tambahkan link sosial media kamu',
                         value: 'add',
-                        emoji: { name : '➕' }
+                        emoji: { name: '➕'}
                     },
                     {
                         label: 'Edit Sosial Media',
@@ -43,7 +50,7 @@ module.exports = new Component({
                         label: 'Hapus Sosial Media',
                         description: 'Hapus link sosial media kamu',
                         value: 'remove',
-                        emoji: { name: '🗑️' }
+                        emoji: { name : '🗑️'}
                     }
                 ])
         );
