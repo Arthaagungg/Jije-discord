@@ -1,78 +1,79 @@
-const Event = require('../../structure/Event');
+const { Events } = require("discord.js");
 
-module.exports = new Event({
-  event: 'interactionCreate',
-  run: async (client, interaction) => {
-    try {
-      // Message commands
-      if (interaction.isMessageContextMenuCommand()) {
-        const command = client.collection.commands.application.get(interaction.commandName);
-        if (command) await command.run(client, interaction);
-        return;
-      }
-
-      // Slash commands
-      if (interaction.isChatInputCommand()) {
-        const command = client.collection.commands.slash.get(interaction.commandName);
-        if (command) await command.run(client, interaction);
-        return;
-      }
-
-      // Button interaction
-      if (interaction.isButton()) {
-        const id = interaction.customId;
-        let component = client.collection.components.buttons.get(id);
-
-        if (!component) {
-          component = [...client.collection.components.buttons.values()].find(btn =>
-            typeof btn.customId === 'string' && id.startsWith(btn.customId)
-          );
-        }
-
-        if (component) await component.run(client, interaction);
-        return;
-      }
-
-      // Select menu interaction
-      if (interaction.isAnySelectMenu()) {
-        const id = interaction.customId;
-        let component = client.collection.components.selects.get(id);
-
-        if (!component) {
-          component = [...client.collection.components.selects.values()].find(sel =>
-            typeof sel.customId === 'string' && id.startsWith(sel.customId)
-          );
-        }
-
-        if (component) await component.run(client, interaction);
-        return;
-      }
-
-      // Modal interaction
-      if (interaction.isModalSubmit()) {
-        const id = interaction.customId;
-        let component = client.collection.components.modals.get(id);
-
-        if (!component) {
-          component = [...client.collection.components.modals.values()].find(mod =>
-            typeof mod.customId === 'string' && id.startsWith(mod.customId)
-          );
-        }
-
-        if (component) await component.run(client, interaction);
-        return;
-      }
-
-      // Autocomplete interaction
-      if (interaction.isAutocomplete()) {
-        const command = client.collection.commands.slash.get(interaction.commandName);
-        if (command && command.autocomplete) {
-          await command.autocomplete(client, interaction);
-        }
-      }
-
-    } catch (error) {
-      console.error('[Interaction Error]', error);
+/**
+ * Fungsi bantu untuk mencari komponen berdasarkan customId (dukungan RegExp)
+ */
+function findComponent(collection, customId) {
+  for (const comp of collection.values()) {
+    if (
+      typeof comp.customId === "string" && comp.customId === customId ||
+      comp.customId instanceof RegExp && comp.customId.test(customId)
+    ) {
+      return comp;
     }
   }
-}).toJSON();
+  return null;
+}
+
+module.exports = {
+  name: Events.InteractionCreate,
+  /**
+   * 
+   * @param {import("../client/DiscordBot")} client 
+   * @param {import("discord.js").Interaction} interaction 
+   */
+  run: async (client, interaction) => {
+    try {
+      // Slash command
+      if (interaction.isChatInputCommand()) {
+        const command = client.collection.commands.get(interaction.commandName);
+        if (!command) return;
+
+        await command.run(client, interaction);
+      }
+
+      // Context Menu
+      else if (interaction.isContextMenuCommand()) {
+        const command = client.collection.commands.get(interaction.commandName);
+        if (!command) return;
+
+        await command.run(client, interaction);
+      }
+
+      // Autocomplete
+      else if (interaction.isAutocomplete()) {
+        const component = client.collection.components.autocomplete.get(interaction.commandName);
+        if (!component) return;
+
+        await component.run(client, interaction);
+      }
+
+      // Button
+      else if (interaction.isButton()) {
+        const component = findComponent(client.collection.components.buttons, interaction.customId);
+        if (!component) return;
+
+        await component.run(client, interaction);
+      }
+
+      // Select Menu
+      else if (interaction.isAnySelectMenu()) {
+        const component = findComponent(client.collection.components.selects, interaction.customId);
+        if (!component) return;
+
+        await component.run(client, interaction);
+      }
+
+      // Modal Submit
+      else if (interaction.isModalSubmit()) {
+        const component = findComponent(client.collection.components.modals, interaction.customId);
+        if (!component) return;
+
+        await component.run(client, interaction);
+      }
+
+    } catch (err) {
+      console.error("[Interaction Error]", err);
+    }
+  }
+};
