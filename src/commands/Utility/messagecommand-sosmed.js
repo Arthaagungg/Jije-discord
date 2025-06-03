@@ -5,9 +5,22 @@ const DiscordBot = require("../../client/DiscordBot");
 const MessageCommand = require("../../structure/MessageCommand");
 
 module.exports = new MessageCommand({
-    name: "sosmed",
-
-    async run({ message }) {
+    command: {
+        name: 'sosmed',
+        description: 'sosmed',
+        aliases: ['sosmed'],
+        permissions: ['SendMessages']
+    },
+    options: {
+        cooldown: 5000
+    },
+    /**
+     * 
+     * @param {DiscordBot} client 
+     * @param {Message} message 
+     * @param {string[]} args
+     */
+    run: async (client, message, args) => {
         const user = message.mentions.users.first() || message.author;
         const isSelf = user.id === message.author.id;
 
