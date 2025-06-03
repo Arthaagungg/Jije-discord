@@ -1,49 +1,75 @@
-const { EmbedBuilder } = require('discord.js');
-const sosmedDb = require('../utils/sosmedDb');
+const { Message, MessageMentions, MessageActionRow, MessageButton } = require('discord.js');
+const DiscordBot = require('../../client/DiscordBot');
+const MessageCommand = require('../../structure/MessageCommand');
+const socialManager = require('../../utils/socialManager');
 
-module.exports = {
-  name: 'sosmed',
-  aliases: [],
-  description: 'Lihat sosial media kamu yang tersimpan.',
-  usage: '!sosmed',
+/**
+ * Format embed sosial media
+ */
+function formatSocialEmbed(username, avatarURL, socials) {
+    const platformEmoji = {
+        instagram: '📸 Instagram',
+        tiktok: '🎵 TikTok',
+        x: '🐦 X'
+    };
 
-  /**
-   * 
-   * @param {import('discord.js').Message} message 
-   */
-  run: async (message) => {
-    const userId = message.author.id;
-    const socials = sosmedDb.getUserSocials(userId);
+    const description = socials.length
+        ? socials.map((s, i) => `**${platformEmoji[s.platform] || s.platform}:** [Link](${s.url})`).join('\n')
+        : '_Belum menambahkan sosial media_';
 
-    if (Object.keys(socials).length === 0) {
-      return message.reply('📭 Kamu belum menyimpan sosial media apapun.');
+    return {
+        color: 0x00B2FF,
+        title: `📱 Sosial Media ${username}`,
+        description,
+        thumbnail: {
+            url: avatarURL
+        },
+        timestamp: new Date()
+    };
+}
+
+module.exports = new MessageCommand({
+    command: {
+        name: 'sosmed',
+        description: 'Menampilkan sosial media kamu atau user lain.',
+        aliases: ['social'],
+        permissions: ['SendMessages']
+    },
+    options: {
+        cooldown: 5000
+    },
+
+    /**
+     * @param {DiscordBot} client 
+     * @param {Message} message 
+     * @param {string[]} args
+     */
+    run: async (client, message, args) => {
+        const targetUser = message.mentions.users.first() || message.author;
+        const socials = socialManager.getUserSocials(targetUser.id);
+
+        const embed = formatSocialEmbed(
+            targetUser.username,
+            targetUser.displayAvatarURL({ dynamic: true }),
+            socials
+        );
+
+        const row = {
+            type: 1, // ActionRow
+            components: [
+                {
+                    type: 2, // Button
+                    style: 1, // PRIMARY
+                    custom_id: `sosmed_manage_${targetUser.id}`,
+                    label: 'Kelola Sosmed',
+                    emoji: '⚙️'
+                }
+            ]
+        };
+
+        await message.reply({
+            embeds: [embed],
+            components: [row]
+        });
     }
-
-    const embed = new EmbedBuilder()
-      .setColor('#1DA1F2')
-      .setTitle(`📱 Sosial Media ${message.member?.nickname || message.author.username}`)
-      .setDescription(
-        Object.entries(socials)
-          .map(([platform, username]) => {
-            let url;
-            switch (platform.toLowerCase()) {
-              case 'tiktok':
-                url = `https://www.tiktok.com/@${username}`; break;
-              case 'instagram':
-                url = `https://www.instagram.com/${username}`; break;
-              case 'x':
-              case 'twitter':
-                url = `https://twitter.com/${username}`; break;
-              default:
-                url = `https://${platform}.com/${username}`;
-            }
-
-            return `🔗 **${platform}**: [@${username}](${url})`;
-          })
-          .join('\n')
-      )
-      .setFooter({ text: 'Gunakan !sosmed add <platform> <username> untuk menambahkan.' });
-
-    message.reply({ embeds: [embed] });
-  }
-};
+}).toJSON();
