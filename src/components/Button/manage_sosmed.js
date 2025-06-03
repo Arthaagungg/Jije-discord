@@ -1,16 +1,22 @@
-const { ButtonInteraction, MessageActionRow, MessageSelectMenu } = require("discord.js");
-const DiscordBot = require("../../client/DiscordBot");
-const Component = require("../../structure/Component");
-
 module.exports = new Component({
     customId: 'sosmed_manage',
     type: 'button',
+
     /**
-     * 
      * @param {DiscordBot} client 
      * @param {ButtonInteraction} interaction 
      */
     run: async (client, interaction) => {
+        // Cegah orang lain klik tombol yang bukan miliknya
+        if (interaction.user.id !== interaction.message.interaction?.user?.id &&
+            interaction.user.id !== interaction.message.mentions?.users?.first()?.id &&
+            interaction.user.id !== interaction.message.author?.id
+        ) {
+            return interaction.reply({
+                content: '❌ Kamu tidak bisa mengelola sosial media milik orang lain.',
+                ephemeral: true
+            });
+        }
 
         const row = new MessageActionRow().addComponents(
             new MessageSelectMenu()
