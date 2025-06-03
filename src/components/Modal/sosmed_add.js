@@ -1,6 +1,8 @@
 const { ModalSubmitInteraction } = require("discord.js");
 const { addSocial, allowedPlatforms } = require("../../utils/socialManager");
+const DiscordBot = require("../../client/DiscordBot");
 
+module.exports = new Component({
 const Component = require("../../structure/Component");
 
 module.exports = new Component({
