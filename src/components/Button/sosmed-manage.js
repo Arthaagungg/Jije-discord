@@ -25,7 +25,7 @@ module.exports = new Component({
     const userId = interaction.user.id;
 
     const selectMenu = new StringSelectMenuBuilder()
-      .setCustomId(`sosmed_action_menu`)
+      .setCustomId(`sosmed_action_menu:${userId}`)
       .setPlaceholder("Pilih aksi sosial media")
       .addOptions(
         new StringSelectMenuOptionBuilder()
