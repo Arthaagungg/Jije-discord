@@ -5,7 +5,9 @@ const {
   ActionRowBuilder,
 } = require("discord.js");
 
-module.exports = {
+const Component = require("../../structure/Component");
+
+module.exports = new Component({
   customId: "select-sosmed",
   type: "selectMenu",
   run: async (interaction) => {
@@ -27,4 +29,4 @@ module.exports = {
 
     await interaction.showModal(modal);
   },
-};
+}).toJSON();
