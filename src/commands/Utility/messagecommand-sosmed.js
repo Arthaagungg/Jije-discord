@@ -53,7 +53,7 @@ module.exports = new MessageCommand({
           .setLabel("Kelola Sosmed")
           .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
-          .setCustomId("sosmed-add")
+          .setCustomId("add-sosmed")
           .setLabel("➕ Input Sosmed")
           .setStyle(ButtonStyle.Secondary)
       );
