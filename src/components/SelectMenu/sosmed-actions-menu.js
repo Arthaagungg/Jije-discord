@@ -21,7 +21,7 @@ module.exports = new Component({
     const [_, action, userId] = interaction.customId.split(":");
 
     if (interaction.user.id !== userId) {
-      return interaction.reply({ content: "❌ Ini bukan menu milik kamu.", ephemeral: true });
+      return interaction.reply({ content: `❌ Ini bukan menu milik kamu (expected: ${userId} , ${interaction.user.id}).`, ephemeral: true });
     }
 
     const selected = interaction.values[0];
