@@ -63,4 +63,4 @@ module.exports = new Component({
       components,
     });
   },
-});
+}).toJSON();
