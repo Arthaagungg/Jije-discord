@@ -29,6 +29,7 @@ await socialManager.addSocial(interaction.user.id, {
   platform,
   username
 });
+await interaction.deferReply({ ephemeral: true });
 
 await interaction.reply({
   content: `✅ Berhasil menambahkan ${platform} dengan username \`${username}\`!`,
