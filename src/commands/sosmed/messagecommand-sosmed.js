@@ -5,7 +5,8 @@ const { getUserSocials, allowedPlatforms } = require("../../utils/socialManager"
 
 function generateUrl(platform, username) { switch (platform.toLowerCase()) { case "instagram": return https://instagram.com/${username}; case "tiktok": return https://tiktok.com/@${username}; case "x": return https://x.com/${username}; default: return username; } }
 
-module.exports = new MessageCommand({ command: { name: "sosmed", description: "Tampilkan sosial media kamu atau user lain.", aliases: [] }, options: { cooldown: 3000 }, /**
+module.exports = new MessageCommand({ command: { name: "sosmed", description: "Tampilkan sosial media kamu atau user lain.", aliases: [] }, options: { cooldown: 3000 }, 
+/**
 
 @param {DiscordBot} client
 
