@@ -1,8 +1,7 @@
 const {
     ButtonInteraction,
     ActionRowBuilder,
-    StringSelectMenuBuilder,
-    ComponentType
+    StringSelectMenuBuilder
 } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
@@ -38,27 +37,45 @@ module.exports = new Component({
                         label: 'Tambah Sosial Media',
                         description: 'Tambahkan link sosial media kamu',
                         value: 'add',
-                        emoji: { name: '➕'}
+                        emoji: { name: '➕' }
                     },
                     {
                         label: 'Edit Sosial Media',
                         description: 'Ubah link sosial media kamu',
                         value: 'edit',
-                        emoji: { name: '✏️'}
+                        emoji: { name: '✏️' }
                     },
                     {
                         label: 'Hapus Sosial Media',
                         description: 'Hapus link sosial media kamu',
                         value: 'remove',
-                        emoji: { name : '🗑️'}
+                        emoji: { name: '🗑️' }
                     }
                 ])
         );
 
-        await interaction.reply({
-            content: 'Silakan pilih aksi yang ingin kamu lakukan:',
-            components: [row],
-            ephemeral: true
-        });
+        // Safe reply with fallback to followUp
+        try {
+            await interaction.reply({
+                content: 'Silakan pilih aksi yang ingin kamu lakukan:',
+                components: [row],
+                ephemeral: true
+            });
+        } catch (err) {
+            if (err.code === 10062) {
+                // Unknown interaction (sudah dismissed), gunakan followUp
+                return interaction.followUp({
+                    content: 'Silakan pilih aksi yang ingin kamu lakukan:',
+                    components: [row],
+                    ephemeral: true
+                });
+            } else {
+                console.error("❌ Gagal merespon tombol sosmed_manage:", err);
+                return interaction.followUp({
+                    content: '❌ Terjadi kesalahan saat menampilkan menu sosial media.',
+                    ephemeral: true
+                });
+            }
+        }
     }
 }).toJSON();
