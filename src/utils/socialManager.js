@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const dataFile = path.resolve(__dirname, '../../data/socials.json');
+const dataFile = path.resolve(__dirname, '../../data/sosmed.json');
 
 function readData() {
     if (!fs.existsSync(dataFile)) return {};
