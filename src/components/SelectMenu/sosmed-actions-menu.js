@@ -52,6 +52,10 @@ module.exports = new Component({
         );
 
       await interaction.showModal(modal);
+      await interaction.reply({
+        content:"test",
+        ephemeral:false
+    });
     }
 
     else if (selected === "edit") {
