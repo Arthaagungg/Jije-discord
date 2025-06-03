@@ -1,52 +1,51 @@
-const { ModalSubmitInteraction } = require("discord.js");
-const { addSocial, allowedPlatforms } = require("../../utils/socialManager");
-const DiscordBot = require("../../client/DiscordBot");
+const { MessageActionRow, Modal, TextInputComponent } = require('discord.js');
+const Component = require('../../structure/Component');
+const socialManager = require('../../utils/socialManager');
+const DiscordBot = require('../../client/DiscordBot');
 
 module.exports = new Component({
-const Component = require("../../structure/Component");
+  customId: 'sosmed_modal_add',
+  type: 'modal',
 
-module.exports = new Component({
-  customId: "add-sosmed",
-  type: "modal",
   /**
-   * @param {ModalSubmitInteraction} interaction
+   * 
+   * @param {DiscordBot} client 
+   * @param {import('discord.js').ModalSubmitInteraction} interaction 
    */
-  run: async (interaction) => {
-    const platform = interaction.fields.getTextInputValue("platform")?.toLowerCase();
-    const username = interaction.fields.getTextInputValue("username");
+  run: async (client, interaction) => {
+    const userId = interaction.user.id;
 
-    if (!allowedPlatforms.includes(platform)) {
-      return await interaction.reply({
-        content: `❌ Platform tidak valid. Pilih dari: ${allowedPlatforms.join(", ")}`,
-        ephemeral: true,
+    const platform = interaction.fields.getTextInputValue('platform').trim().toLowerCase();
+    const url = interaction.fields.getTextInputValue('url').trim();
+
+    // Validasi platform
+    const allowed = ['tiktok', 'instagram', 'x'];
+    if (!allowed.includes(platform)) {
+      return interaction.reply({
+        content: `❌ Platform tidak valid. Gunakan salah satu: ${allowed.join(', ')}`,
+        ephemeral: true
       });
     }
 
-    if (!username) {
-      return await interaction.reply({
-        content: `❌ Username tidak boleh kosong.`,
-        ephemeral: true,
+    // Validasi URL sederhana
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return interaction.reply({
+        content: '❌ URL harus dimulai dengan http:// atau https://',
+        ephemeral: true
       });
     }
 
-    let url;
-    switch (platform) {
-      case "tiktok":
-        url = `https://tiktok.com/@${username}`;
-        break;
-      case "instagram":
-        url = `https://instagram.com/${username}`;
-        break;
-      case "x":
-        url = `https://x.com/${username}`;
-        break;
+    const added = socialManager.addUserSocial(userId, platform, url);
+    if (!added) {
+      return interaction.reply({
+        content: '⚠️ Data sudah ada. Tidak ditambahkan ulang.',
+        ephemeral: true
+      });
     }
 
-    addSocial(interaction.user.id, platform, url);
-
-    await interaction.reply({
-      content: `✅ Berhasil menambahkan sosial media **${platform}**: [${username}](${url})`,
-      ephemeral: true,
+    return interaction.reply({
+      content: `✅ Sukses menambahkan sosial media **${platform}**.`,
+      ephemeral: true
     });
-  },
+  }
 }).toJSON();
