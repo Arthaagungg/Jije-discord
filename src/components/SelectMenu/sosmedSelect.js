@@ -1,39 +1,30 @@
-const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require("discord.js");
-const DiscordBot = require("../../client/DiscordBot");
-const Component = require("../../structure/Component");
+const {
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ActionRowBuilder,
+} = require("discord.js");
 
-module.exports = new Component({
-    customId: 'sosmed_select',
-    type: 'select',
+module.exports = {
+  customId: "select-sosmed",
+  type: "selectMenu",
+  run: async (interaction) => {
+    const [platform, url] = interaction.values[0].split("|");
 
-    /**
-     * @param {DiscordBot} client 
-     * @param {import("discord.js").AnySelectMenuInteraction} interaction 
-     */
-    run: async (client, interaction) => {
-        const action = interaction.values[0];
+    const modal = new ModalBuilder()
+      .setCustomId(`edit-sosmed-${platform}|${url}`)
+      .setTitle("Edit atau Hapus Sosmed");
 
-        const modal = new ModalBuilder()
-            .setCustomId(`sosmed_${action}`)
-            .setTitle(`${action[0].toUpperCase() + action.slice(1)} Sosial Media`);
+    const urlInput = new TextInputBuilder()
+      .setCustomId("newUrl")
+      .setLabel("Link baru (biarkan kosong untuk hapus)")
+      .setStyle(TextInputStyle.Short)
+      .setPlaceholder("https://...")
+      .setRequired(false);
 
-        const input1 = new TextInputBuilder()
-            .setCustomId("platform")
-            .setLabel("Nama Platform (contoh: TikTok)")
-            .setStyle(TextInputStyle.Short)
-            .setRequired(true);
+    const firstRow = new ActionRowBuilder().addComponents(urlInput);
+    modal.addComponents(firstRow);
 
-        const input2 = new TextInputBuilder()
-            .setCustomId("username")
-            .setLabel("Username (contoh: @namaanda)")
-            .setStyle(TextInputStyle.Short)
-            .setRequired(action !== "delete");
-
-        modal.addComponents(
-            new ActionRowBuilder().addComponents(input1),
-            new ActionRowBuilder().addComponents(input2)
-        );
-
-        await interaction.showModal(modal);
-    }
-}).toJSON();
+    await interaction.showModal(modal);
+  },
+};
