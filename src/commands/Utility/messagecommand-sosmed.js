@@ -55,17 +55,17 @@ module.exports = new MessageCommand({
         );
 
         const row = {
-            type: 1, // ActionRow
-            components: [
-                {
-                    type: 2, // Button
-                    style: 1, // PRIMARY
-                    custom_id: `sosmed_manage_${targetUser.id}`,
-                    label: 'Kelola Sosmed',
-                    emoji: '⚙️'
-                }
-            ]
-        };
+  type: 1, // ActionRow
+  components: [
+    {
+      type: 2, // Button
+      style: 1, // PRIMARY
+      custom_id: `sosmed_manage_${targetUser.id}`,
+      label: 'Kelola Sosmed',
+      emoji: { name: '⚙️' } // ✅ Perbaikan di sini
+    }
+  ]
+};
 
         await message.reply({
             embeds: [embed],
