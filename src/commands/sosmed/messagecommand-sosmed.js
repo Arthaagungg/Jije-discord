@@ -1,75 +1,54 @@
-const { Message, MessageMentions, MessageActionRow, MessageButton } = require('discord.js');
-const DiscordBot = require('../../client/DiscordBot');
-const MessageCommand = require('../../structure/MessageCommand');
-const socialManager = require('../../utils/socialManager');
+const { Message, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const DiscordBot = require("../../client/DiscordBot");
+const MessageCommand = require("../../structure/MessageCommand");
+const path = require("path");
+const fs = require("fs");
 
-/**
- * Format embed sosial media
- */
-function formatSocialEmbed(username, avatarURL, socials) {
-    const platformEmoji = {
-        instagram: '📸 Instagram',
-        tiktok: '🎵 TikTok',
-        x: '🐦 X'
-    };
+const sosmedPath = path.join(__dirname, "../../data/sosmed.json");
 
-    const description = socials.length
-        ? socials.map((s, i) => `**${platformEmoji[s.platform] || s.platform}:** [Link](${s.url})`).join('\n')
-        : '_Belum menambahkan sosial media_';
-
-    return {
-        color: 0x00B2FF,
-        title: `📱 Sosial Media ${username}`,
-        description,
-        thumbnail: {
-            url: avatarURL
-        },
-        timestamp: new Date()
-    };
+function loadSosmed() {
+    if (!fs.existsSync(sosmedPath)) return {};
+    return JSON.parse(fs.readFileSync(sosmedPath, "utf8"));
 }
 
 module.exports = new MessageCommand({
     command: {
         name: 'sosmed',
-        description: 'Menampilkan sosial media kamu atau user lain.',
-        aliases: ['social'],
+        description: 'Menampilkan sosial media Anda atau pengguna lain.',
+        aliases: [],
         permissions: ['SendMessages']
     },
     options: {
-        cooldown: 5000
+        cooldown: 5000,
     },
 
-    /**
-     * @param {DiscordBot} client 
-     * @param {Message} message 
-     * @param {string[]} args
+    /** @param {DiscordBot} client
+     *  @param {Message} message
+     *  @param {string[]} args
      */
     run: async (client, message, args) => {
-        const targetUser = message.mentions.users.first() || message.author;
-        const socials = socialManager.getUserSocials(targetUser.id);
+        const target = message.mentions.users.first() || message.author;
+        const sosmed = loadSosmed();
+        const data = sosmed[target.id] || {};
 
-        const embed = formatSocialEmbed(
-            targetUser.username,
-            targetUser.displayAvatarURL({ dynamic: true }),
-            socials
+        const entries = Object.entries(data).map(([platform, username]) => `> **${platform}**: ${username}`);
+        const description = entries.length > 0 ? entries.join("\n") : "_Tidak ada sosial media yang tersimpan._";
+
+        const embed = new EmbedBuilder()
+            .setColor(0x00BFFF)
+            .setTitle(`📱 Sosial Media - ${target.username}`)
+            .setDescription(description)
+            .setFooter({ text: `Diminta oleh ${message.author.username}`, iconURL: message.author.displayAvatarURL() })
+            .setTimestamp();
+
+        const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("manage_sosmed")
+                .setLabel("Kelola Sosmed")
+                .setEmoji("⚙️")
+                .setStyle(ButtonStyle.Primary)
         );
 
-        const row = {
-            type: 1, // ActionRow
-            components: [
-                {
-                    type: 2, // Button
-                    style: 1, // PRIMARY
-                    custom_id: `sosmed_manage_${targetUser.id}`,
-                    label: 'Kelola Sosmed',
-                    emoji: '⚙️'
-                }
-            ]
-        };
-
-        await message.reply({
-            embeds: [embed],
-            components: [row]
-        });
+        return message.reply({ embeds: [embed], components: [row] });
     }
 }).toJSON();
