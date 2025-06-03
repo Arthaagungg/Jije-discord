@@ -73,4 +73,4 @@ module.exports = new Event({
       console.error("[Interaction Error]", err);
     }
   }
-};
+}).toJSON();
