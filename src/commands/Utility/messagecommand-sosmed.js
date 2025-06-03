@@ -1,34 +1,20 @@
-const { ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { Message } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
-const { getUserSocials } = require("../../utils/sosmedStorage");
 const MessageCommand = require("../../structure/MessageCommand");
+const { getUserSocials } = require("../../utils/sosmedStorage");
 
 module.exports = new MessageCommand({
-    command: {
-        name: 'sosmed',
-        description: 'Lihat sosial media kamu atau orang lain',
-        type: 1,
-        options: [
-            {
-                name: 'user',
-                description: 'User yang ingin kamu lihat sosial medianya',
-                type: 6, // USER
-                required: false
-            }
-        ]
-    },
-    options: {
-        cooldown: 5000
-    },
-    
+    name: "sosmed",
+    description: "Lihat sosial media kamu atau orang lain",
+
     /**
      * @param {DiscordBot} client 
-     * @param {ChatInputCommandInteraction} interaction 
+     * @param {Message} message 
      */
-    run: async (client, interaction) => {
-        const mention = interaction.options.getUser('user');
-        const targetUser = mention || interaction.user;
-        const isSelf = targetUser.id === interaction.user.id;
+    run: async (client, message) => {
+        const mention = message.mentions.users.first();
+        const targetUser = mention || message.author;
+        const isSelf = targetUser.id === message.author.id;
 
         const socials = getUserSocials(targetUser.id);
         const platformList = ['tiktok', 'instagram', 'x'];
@@ -46,41 +32,13 @@ module.exports = new MessageCommand({
         }
 
         if (!content) {
-            content = isSelf 
-                ? '*Kamu belum menambahkan sosial media apapun.*' 
+            content = isSelf
+                ? '*Kamu belum menambahkan sosial media apapun.*'
                 : `*${targetUser.username} belum menambahkan sosial media apapun.*`;
         }
 
-        const components = [];
-
-        if (isSelf) {
-            const row = new ActionRowBuilder().addComponents(
-                new ButtonBuilder()
-                    .setCustomId('sosmed_add')
-                    .setLabel('Tambah')
-                    .setEmoji('➕')
-                    .setStyle(ButtonStyle.Success),
-
-                new ButtonBuilder()
-                    .setCustomId('sosmed_edit')
-                    .setLabel('Edit')
-                    .setEmoji('✏️')
-                    .setStyle(ButtonStyle.Primary),
-
-                new ButtonBuilder()
-                    .setCustomId('sosmed_delete')
-                    .setLabel('Hapus')
-                    .setEmoji('❌')
-                    .setStyle(ButtonStyle.Danger)
-            );
-
-            components.push(row);
-        }
-
-        await interaction.reply({
-            content: `📱 **Sosial Media ${isSelf ? 'Kamu' : targetUser.username}:**\n\n${content}`,
-            components,
-            ephemeral: true
+        await message.reply({
+            content: `📱 **Sosial Media ${isSelf ? 'Kamu' : targetUser.username}:**\n\n${content}`
         });
     }
 }).toJSON();
