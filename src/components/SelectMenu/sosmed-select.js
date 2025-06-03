@@ -46,12 +46,7 @@ module.exports = new Component({
         }
 
         const userSocials = socialManager.getUserSocials(userId);
-        if (userSocials.length === 0) {
-            return interaction.reply({
-                content: '❌ Kamu belum punya sosial media untuk dikelola.',
-                ephemeral: true
-            });
-        }
+        
 
         if (action === 'edit') {
             const modal = new ModalBuilder()
