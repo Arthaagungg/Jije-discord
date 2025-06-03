@@ -1,5 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const { getUserSocials } = require("../../Handlers/socialsHandler");
+const { getUserSocials } = require("../../utils/socials");
 
 const DiscordBot = require("../../client/DiscordBot");
 const MessageCommand = require("../../structure/MessageCommand");
