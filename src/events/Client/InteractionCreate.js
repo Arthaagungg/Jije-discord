@@ -18,7 +18,7 @@ function findComponent(collection, customId) {
 }
 
 module.exports = new Event({
-  name: 'InteractionCreate',
+  event: 'InteractionCreate',
 
   /**
    * 
