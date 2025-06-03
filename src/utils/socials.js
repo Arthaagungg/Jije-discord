@@ -13,36 +13,34 @@ async function getUserSocials(userId) {
 }
 
 async function addSocial(userId, platform, username) {
-    if (!allowedPlatforms.includes(platform)) throw new Error("Platform tidak valid");
-
-    const url = `https://${platform}.com/${username}`;
+    if (!allowedPlatforms.includes(platform)) {
+        throw new Error("Platform tidak valid");
+    }
 
     const { error } = await supabase
         .from("socials")
-        .insert([{ user_id: userId, platform, url }]);
+        .insert([{ user_id: userId, platform, username }]);
 
     if (error) throw error;
 }
 
 async function editSocial(userId, platform, newUsername) {
-    const url = `https://${platform}.com/${newUsername}`;
-
     const { error } = await supabase
         .from("socials")
-        .update({ url })
+        .update({ username: newUsername })
         .eq("user_id", userId)
         .eq("platform", platform);
 
     if (error) throw error;
 }
 
-async function removeSocial(userId, platform, url) {
+async function removeSocial(userId, platform, username) {
     const { error } = await supabase
         .from("socials")
         .delete()
         .eq("user_id", userId)
         .eq("platform", platform)
-        .eq("url", url);
+        .eq("username", username);
 
     if (error) throw error;
 }
