@@ -2,28 +2,21 @@ const {
   ActionRowBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-  ComponentType,
   EmbedBuilder,
 } = require("discord.js");
-const { getUserSocials, allowedPlatforms } = require("../../utils/socialManager");
+const { getUserSocials } = require("../../utils/socialManager");
 const Component = require("../../structure/Component");
 
-/**
- * @type {import('discord.js').ButtonInteractionHandler}
- */
 module.exports = new Component({
   customId: "sosmed-manage",
   type: "button",
-  run: async (interaction) => {
-    const [, userId] = interaction.customId.match(/^sosmed-manage-(\d+)$/);
 
-    if (interaction.user.id !== userId) {
-      return interaction.reply({
-        content: "Kamu tidak bisa mengelola sosial media orang lain!",
-        ephemeral: true,
-      });
-    }
-
+  /**
+   * @param {import("../../client/DiscordBot")} client
+   * @param {import("discord.js").ButtonInteraction} interaction
+   */
+  run: async (client, interaction) => {
+    const userId = interaction.user.id;
     const socials = getUserSocials(userId);
 
     const embed = new EmbedBuilder()
@@ -35,11 +28,16 @@ module.exports = new Component({
           : "Kamu belum menambahkan sosial media."
       );
 
+    if (socials.length === 0) {
+      return interaction.reply({
+        embeds: [embed],
+        ephemeral: true,
+      });
+    }
+
     const menu = new StringSelectMenuBuilder()
       .setCustomId("select-sosmed")
       .setPlaceholder("Pilih sosial media...")
-      .setMinValues(1)
-      .setMaxValues(1)
       .addOptions(
         socials.map((acc) =>
           new StringSelectMenuOptionBuilder()
@@ -52,7 +50,7 @@ module.exports = new Component({
 
     await interaction.reply({
       embeds: [embed],
-      components: socials.length > 0 ? [row] : [],
+      components: [row],
       ephemeral: true,
     });
   },
