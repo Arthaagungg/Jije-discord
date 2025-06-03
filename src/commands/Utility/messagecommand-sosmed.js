@@ -1,80 +1,66 @@
-const { Message, MessageMentions } = require('discord.js');
-const DiscordBot = require('../../client/DiscordBot');
-const MessageCommand = require('../../structure/MessageCommand');
-const socialManager = require('../../utils/socialManager');
+const { Component } = require('../../structure/Component');
+const { getUserSocials } = require('../../utils/sosmedStorage');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
-/**
- * Format embed sosial media
- */
-function formatSocialEmbed(username, avatarURL, socials) {
-    const platformEmoji = {
-        instagram: '📸 Instagram',
-        tiktok: '🎵 TikTok',
-        x: '🐦 X'
-    };
+module.exports = new Component({
+  name: 'messagecommand-sosmed',
+  description: 'Lihat sosial media kamu atau orang lain',
 
-    const description = socials.length
-        ? socials.map((s, i) => `**${platformEmoji[s.platform] || s.platform}:** [Link](${s.url})`).join('\n')
-        : '_Belum menambahkan sosial media_';
+  /**
+   * @param {import('discord.js').Message} message
+   */
+  async run(message) {
+    const mention = message.mentions.users.first();
+    const targetUser = mention || message.author;
+    const isSelf = targetUser.id === message.author.id;
 
-    return {
-        color: 0x00B2FF,
-        title: `📱 Sosial Media ${username}`,
-        description,
-        thumbnail: {
-            url: avatarURL
-        },
-        timestamp: new Date()
-    };
-}
+    const socials = getUserSocials(targetUser.id);
+    let description = '';
 
-module.exports = new MessageCommand({
-    command: {
-        name: 'sosmed',
-        description: 'Menampilkan sosial media kamu atau user lain.',
-        aliases: ['social'],
-        permissions: ['SendMessages']
-    },
-    options: {
-        cooldown: 5000
-    },
-
-    /**
-     * @param {DiscordBot} client 
-     * @param {Message} message 
-     * @param {string[]} args
-     */
-    run: async (client, message, args) => {
-        const targetUser = message.mentions.users.first() || message.author;
-        const socials = socialManager.getUserSocials(targetUser.id);
-
-        const embed = formatSocialEmbed(
-            targetUser.username,
-            targetUser.displayAvatarURL({ dynamic: true }),
-            socials
-        );
-
-        const components = [];
-
-        // Tampilkan tombol hanya jika user mengecek sosial media sendiri
-        if (targetUser.id === message.author.id) {
-            components.push({
-                type: 1, // ActionRow
-                components: [
-                    {
-                        type: 2, // Button
-                        style: 1, // PRIMARY
-                        custom_id: `sosmed_manage`,
-                        label: 'Kelola Sosmed',
-                        emoji: { name: '⚙️' }
-                    }
-                ]
-            });
-        }
-
-        await message.reply({
-            embeds: [embed],
-            components
+    const platformList = ['tiktok', 'instagram', 'x'];
+    for (const platform of platformList) {
+      const entries = socials[platform] || [];
+      if (entries.length > 0) {
+        description += `**${platform.charAt(0).toUpperCase() + platform.slice(1)}:**\n`;
+        entries.forEach((url, index) => {
+          description += `${index + 1}. ${url}\n`;
         });
+        description += '\n';
+      }
     }
-}).toJSON();
+
+    if (!description) {
+      description = `*${isSelf ? 'Kamu belum' : `${targetUser.username} belum`} menambahkan sosial media apapun.*`;
+    }
+
+    const components = [];
+
+    if (isSelf) {
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`sosmed_add`)
+          .setLabel('Tambah')
+          .setStyle(ButtonStyle.Success)
+          .setEmoji('➕'),
+
+        new ButtonBuilder()
+          .setCustomId(`sosmed_edit`)
+          .setLabel('Edit')
+          .setStyle(ButtonStyle.Primary)
+          .setEmoji('✏️'),
+
+        new ButtonBuilder()
+          .setCustomId(`sosmed_delete`)
+          .setLabel('Hapus')
+          .setStyle(ButtonStyle.Danger)
+          .setEmoji('❌')
+      );
+      components.push(row);
+    }
+
+    await message.reply({
+      content: `📱 **Sosial Media ${isSelf ? 'Kamu' : targetUser.username}:**\n\n${description}`,
+      components,
+    });
+  },
+});
