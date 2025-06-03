@@ -60,7 +60,7 @@ module.exports = new MessageCommand({
     {
       type: 2, // Button
       style: 1, // PRIMARY
-      custom_id: `sosmed_manage_${targetUser.id}`,
+      custom_id: `sosmed_manage`,
       label: 'Kelola Sosmed',
       emoji: { name: '⚙️' } // ✅ Perbaikan di sini
     }
