@@ -1,4 +1,4 @@
-const { Message, MessageMentions, MessageActionRow, MessageButton } = require('discord.js');
+const { Message, MessageMentions } = require('discord.js');
 const DiscordBot = require('../../client/DiscordBot');
 const MessageCommand = require('../../structure/MessageCommand');
 const socialManager = require('../../utils/socialManager');
@@ -54,22 +54,27 @@ module.exports = new MessageCommand({
             socials
         );
 
-        const row = {
-  type: 1, // ActionRow
-  components: [
-    {
-      type: 2, // Button
-      style: 1, // PRIMARY
-      custom_id: `sosmed_manage`,
-      label: 'Kelola Sosmed',
-      emoji: { name: '⚙️' } // ✅ Perbaikan di sini
-    }
-  ]
-};
+        const components = [];
+
+        // Tampilkan tombol hanya jika user mengecek sosial media sendiri
+        if (targetUser.id === message.author.id) {
+            components.push({
+                type: 1, // ActionRow
+                components: [
+                    {
+                        type: 2, // Button
+                        style: 1, // PRIMARY
+                        custom_id: `sosmed_manage`,
+                        label: 'Kelola Sosmed',
+                        emoji: { name: '⚙️' }
+                    }
+                ]
+            });
+        }
 
         await message.reply({
             embeds: [embed],
-            components: [row]
+            components
         });
     }
 }).toJSON();
