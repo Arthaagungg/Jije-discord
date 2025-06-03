@@ -1,7 +1,7 @@
 const { Message, MessageMentions } = require('discord.js');
 const DiscordBot = require('../../client/DiscordBot');
 const MessageCommand = require('../../structure/MessageCommand');
-const socialManager = require('../../utils/socialManager');
+const socialManager = require('../../utils/sosmedStorage');
 
 /**
  * Format embed sosial media
