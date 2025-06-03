@@ -10,7 +10,7 @@ module.exports = new Component({
      * @param {DiscordBot} client 
      * @param {ButtonInteraction} interaction 
      */
-    execute: async (interaction) => {
+    run: async (client, interaction) => {
         const [, targetUserId] = interaction.customId.match(/^sosmed_manage_(\d+)$/);
 
         if (interaction.user.id !== targetUserId) {
