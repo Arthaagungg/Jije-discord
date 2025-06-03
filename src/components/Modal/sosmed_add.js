@@ -1,39 +1,48 @@
 const { ModalSubmitInteraction } = require("discord.js");
-const fs = require("fs");
-const path = require("path");
-const DiscordBot = require("../../client/DiscordBot");
-const Component = require("../../structure/Component");
+const { addSocial, allowedPlatforms } = require("../../utils/socialManager");
 
-const filePath = path.join(__dirname, "../../data/sosmed.json");
+module.exports = {
+  customId: "add-sosmed",
+  type: "modal",
+  /**
+   * @param {ModalSubmitInteraction} interaction
+   */
+  run: async (interaction) => {
+    const platform = interaction.fields.getTextInputValue("platform")?.toLowerCase();
+    const username = interaction.fields.getTextInputValue("username");
 
-function load() {
-    if (!fs.existsSync(filePath)) return {};
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
-}
-function save(data) {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
-}
-
-module.exports = new Component({
-    customId: 'sosmed_add',
-    type: 'modal',
-
-    /**
-     * @param {DiscordBot} client 
-     * @param {ModalSubmitInteraction} interaction 
-     */
-    run: async (client, interaction) => {
-        const platform = interaction.fields.getTextInputValue("platform");
-        const username = interaction.fields.getTextInputValue("username");
-
-        const sosmed = load();
-        if (!sosmed[interaction.user.id]) sosmed[interaction.user.id] = {};
-        sosmed[interaction.user.id][platform] = username;
-        save(sosmed);
-
-        await interaction.reply({
-            content: `✅ Berhasil menambahkan **${platform}**: ${username}`,
-            ephemeral: true
-        });
+    if (!allowedPlatforms.includes(platform)) {
+      return await interaction.reply({
+        content: `❌ Platform tidak valid. Pilih dari: ${allowedPlatforms.join(", ")}`,
+        ephemeral: true,
+      });
     }
-}).toJSON();
+
+    if (!username) {
+      return await interaction.reply({
+        content: `❌ Username tidak boleh kosong.`,
+        ephemeral: true,
+      });
+    }
+
+    let url;
+    switch (platform) {
+      case "tiktok":
+        url = `https://tiktok.com/@${username}`;
+        break;
+      case "instagram":
+        url = `https://instagram.com/${username}`;
+        break;
+      case "x":
+        url = `https://x.com/${username}`;
+        break;
+    }
+
+    addSocial(interaction.user.id, platform, url);
+
+    await interaction.reply({
+      content: `✅ Berhasil menambahkan sosial media **${platform}**: [${username}](${url})`,
+      ephemeral: true,
+    });
+  },
+};
