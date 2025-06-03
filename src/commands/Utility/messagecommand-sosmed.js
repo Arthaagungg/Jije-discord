@@ -7,7 +7,7 @@ const MessageCommand = require("../../structure/MessageCommand");
 module.exports = new MessageCommand({
     command: {
         name: 'sosmed',
-        description: 'sosmed',
+        description: 'sosmed v2',
         aliases: ['sosmed'],
         permissions: ['SendMessages']
     },
