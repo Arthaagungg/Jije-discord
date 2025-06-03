@@ -1,34 +1,33 @@
-module.exports = {
-  name: 'interactionCreate',
+const Event = require('../../structure/Event');
 
-  async execute(interaction) {
-    const { customId } = interaction;
-
-    // Tombol
+module.exports = new Event({
+  event: 'interactionCreate',
+  run: async (client, interaction) => {
     if (interaction.isButton()) {
-      const match = customId.match(/^sosmed_manage_(\d{17,20})$/);
-      if (match) {
-        const userId = match[1];
-        return interaction.reply({ content: `Tombol untuk user ${userId}`, ephemeral: true });
+      if (/^sosmed_manage_\d+$/.test(interaction.customId)) {
+        await interaction.reply({
+          content: 'Kamu ngeklik tombol sosmed_manage!',
+          ephemeral: true,
+        });
       }
     }
 
-    // Select menu
-    if (interaction.isStringSelectMenu()) {
-      const match = customId.match(/^sosmed_manage_(\d{17,20})$/);
-      if (match) {
-        const userId = match[1];
-        return interaction.reply({ content: `Select menu untuk user ${userId}`, ephemeral: true });
-      }
-    }
-
-    // Modal
     if (interaction.isModalSubmit()) {
-      const match = customId.match(/^sosmed_manage_(\d{17,20})$/);
-      if (match) {
-        const userId = match[1];
-        return interaction.reply({ content: `Modal untuk user ${userId}`, ephemeral: true });
+      if (/^sosmed_modal_\d+$/.test(interaction.customId)) {
+        await interaction.reply({
+          content: 'Modal diterima!',
+          ephemeral: true,
+        });
+      }
+    }
+
+    if (interaction.isStringSelectMenu()) {
+      if (/^sosmed_select_\d+$/.test(interaction.customId)) {
+        await interaction.reply({
+          content: 'Select menu dipilih!',
+          ephemeral: true,
+        });
       }
     }
   }
-};
+}).toJSON();
