@@ -9,7 +9,7 @@ const Component = require("../../structure/Component");
 
 module.exports = new Component({
   customId: "select-sosmed",
-  type: "selectMenu",
+  type: "select",
   run: async (interaction) => {
     const [platform, url] = interaction.values[0].split("|");
 
