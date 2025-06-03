@@ -1,48 +1,88 @@
-const { ButtonInteraction, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const {
+  ButtonInteraction,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ComponentType
+} = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
 
-/**
- * @param {DiscordBot} client 
- * @param {ButtonInteraction} interaction 
- */
 module.exports = new Component({
-    customId: "sosmed_manage",
-    type: "button",
+  customId: "sosmed_manage",
+  type: "button",
 
-    run: async (client, interaction) => {
-        await interaction.deferUpdate(); // pakai deferUpdate karena kita akan editReply
+  /**
+   * 
+   * @param {DiscordBot} client 
+   * @param {ButtonInteraction} interaction 
+   */
+  run: async (client, interaction) => {
+    await interaction.deferUpdate();
 
-        const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId("sosmed_action_menu")
-            .setPlaceholder("Pilih aksi sosial media")
-            .addOptions(
-                new StringSelectMenuOptionBuilder()
-                    .setLabel("Tambah Sosial Media")
-                    .setValue("add")
-                    .setEmoji("➕"),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel("Edit Sosial Media")
-                    .setValue("edit")
-                    .setEmoji("✏️"),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel("Hapus Sosial Media")
-                    .setValue("delete")
-                    .setEmoji("🗑️")
-            );
+    const userId = interaction.user.id;
 
-        const disabledButton = new ButtonBuilder()
-            .setCustomId("sosmed_manage")
-            .setLabel("Kelola Sosial Media")
-            .setStyle(ButtonStyle.Primary)
-            .setDisabled(true);
+    const selectMenu = new StringSelectMenuBuilder()
+      .setCustomId(`sosmed_action_menu:${userId}`)
+      .setPlaceholder("Pilih aksi sosial media")
+      .addOptions(
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Tambah Sosial Media")
+          .setValue("add")
+          .setEmoji("➕"),
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Edit Sosial Media")
+          .setValue("edit")
+          .setEmoji("✏️"),
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Hapus Sosial Media")
+          .setValue("delete")
+          .setEmoji("🗑️")
+      );
 
-        const row1 = new ActionRowBuilder().addComponents(selectMenu);
-        const row2 = new ActionRowBuilder().addComponents(disabledButton);
+    const row1 = new ActionRowBuilder().addComponents(selectMenu);
 
-        return interaction.editReply({
-            content: "Pilih aksi yang ingin kamu lakukan:",
-            components: [row1, row2]
+    const disabledButton = new ButtonBuilder()
+      .setCustomId("sosmed_manage")
+      .setLabel("Kelola Sosial Media")
+      .setStyle(ButtonStyle.Primary)
+      .setDisabled(true);
+
+    const row2 = new ActionRowBuilder().addComponents(disabledButton);
+
+    const reply = await interaction.editReply({
+      content: "Pilih aksi yang ingin kamu lakukan:",
+      components: [row1, row2],
+    });
+
+    // 💡 Tambahkan collector
+    const collector = reply.createMessageComponentCollector({
+      componentType: ComponentType.StringSelect,
+      time: 2 * 60 * 1000, // 2 menit
+    });
+
+    collector.on("collect", async (i) => {
+      if (i.user.id !== userId) {
+        return i.reply({
+          content: "❌ Ini bukan menu milik kamu.",
+          ephemeral: true,
         });
-    }
+      }
+
+      // Biarkan handler khusus (sosmed_action_menu.js) yang tangani
+    });
+
+    collector.on("end", async () => {
+      // Disable menu setelah waktu habis
+      selectMenu.setDisabled(true);
+      await reply.edit({
+        components: [
+          new ActionRowBuilder().addComponents(selectMenu),
+          row2
+        ]
+      });
+    });
+  }
 }).toJSON();
