@@ -15,7 +15,7 @@ module.exports = new MessageCommand({
 
         const embed = new EmbedBuilder()
             .setColor("#00b0f4")
-            .setTitle(`🌐 Sosial Media ${user.username}`)
+            .setTitle(`🌐 mySosial Media ${user.username}`)
             .setThumbnail(user.displayAvatarURL({ dynamic: true }))
             .setDescription(
                 socials.length > 0
