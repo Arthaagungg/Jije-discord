@@ -1,8 +1,7 @@
 const {
     ButtonInteraction,
     ActionRowBuilder,
-    StringSelectMenuBuilder,
-    ComponentType
+    StringSelectMenuBuilder
 } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
@@ -16,17 +15,23 @@ module.exports = new Component({
      * @param {ButtonInteraction} interaction 
      */
     run: async (client, interaction) => {
-        // Cek apakah user yang klik adalah pemilik original
         const messageUserId =
             interaction.message.interaction?.user?.id ||
             interaction.message.mentions?.users?.first()?.id ||
             interaction.message.author?.id;
 
         if (interaction.user.id !== messageUserId) {
-            return interaction.reply({
-                content: '❌ Kamu tidak bisa mengelola sosial media milik orang lain.',
-                ephemeral: true
-            });
+            try {
+                if (!interaction.deferred && !interaction.replied) {
+                    await interaction.reply({
+                        content: '❌ Kamu tidak bisa mengelola sosial media milik orang lain.',
+                        ephemeral: true
+                    });
+                }
+            } catch (err) {
+                console.warn("Gagal membalas (akses bukan pemilik):", err.message);
+            }
+            return;
         }
 
         const row = new ActionRowBuilder().addComponents(
@@ -56,27 +61,27 @@ module.exports = new Component({
         );
 
         try {
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({
+            // Coba reply, atau followUp jika sudah replied
+            if (!interaction.deferred && !interaction.replied) {
+                await interaction.reply({
                     content: 'Silakan pilih aksi yang ingin kamu lakukan:',
                     components: [row],
                     ephemeral: true
                 });
             } else {
-                await interaction.reply({
+                await interaction.followUp({
                     content: 'Silakan pilih aksi yang ingin kamu lakukan:',
                     components: [row],
                     ephemeral: true
                 });
             }
-        } catch (err) {
-            console.error('❌ Gagal mengirim reply sosmed_manage:', err);
-            // Optional: tampilkan pesan error ke user
-            if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply({
-                    content: '⚠️ Terjadi kesalahan saat memproses interaksi ini.',
-                    ephemeral: true
-                });
+        } catch (error) {
+            if (error.code === 10062) {
+                console.warn('❗ Interaction tidak valid lagi (ephemeral mungkin sudah di-dismiss)');
+            } else if (error.code === 40060) {
+                console.warn('❗ Interaction sudah di-acknowledge, tidak bisa reply/followUp lagi');
+            } else {
+                console.error('❌ Gagal mengirim sosmed_manage:', error);
             }
         }
     }
