@@ -1,31 +1,58 @@
-const { ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js");
-const DiscordBot = require("../../client/DiscordBot");
-const Component = require("../../structure/Component");
+const {
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+  ComponentType,
+  EmbedBuilder,
+} = require("discord.js");
+const { getUserSocials, allowedPlatforms } = require("../../utils/socialManager");
 
-module.exports = new Component({
-    customId: 'manage_sosmed',
-    type: 'button',
+/**
+ * @type {import('discord.js').ButtonInteractionHandler}
+ */
+module.exports = {
+  customId: /^sosmed-manage-(\d+)$/,
+  type: "button",
+  run: async (interaction) => {
+    const [, userId] = interaction.customId.match(/^sosmed-manage-(\d+)$/);
 
-    /**
-     * @param {DiscordBot} client 
-     * @param {import("discord.js").ButtonInteraction} interaction 
-     */
-    run: async (client, interaction) => {
-        const menu = new StringSelectMenuBuilder()
-            .setCustomId("sosmed_select")
-            .setPlaceholder("Pilih tindakan")
-            .addOptions([
-                { label: "Tambah Sosmed", value: "add", emoji: "🟢" },
-                { label: "Edit Sosmed", value: "edit", emoji: "🟡" },
-                { label: "Hapus Sosmed", value: "delete", emoji: "🔴" }
-            ]);
-
-        const row = new ActionRowBuilder().addComponents(menu);
-
-        await interaction.reply({
-            content: "Silakan pilih tindakan yang ingin dilakukan:",
-            components: [row],
-            ephemeral: true
-        });
+    if (interaction.user.id !== userId) {
+      return interaction.reply({
+        content: "Kamu tidak bisa mengelola sosial media orang lain!",
+        ephemeral: true,
+      });
     }
-}).toJSON();
+
+    const socials = getUserSocials(userId);
+
+    const embed = new EmbedBuilder()
+      .setTitle("Kelola Sosial Media")
+      .setColor("Random")
+      .setDescription(
+        socials.length > 0
+          ? "Pilih sosial media yang ingin kamu edit atau hapus."
+          : "Kamu belum menambahkan sosial media."
+      );
+
+    const menu = new StringSelectMenuBuilder()
+      .setCustomId("select-sosmed")
+      .setPlaceholder("Pilih sosial media...")
+      .setMinValues(1)
+      .setMaxValues(1)
+      .addOptions(
+        socials.map((acc) =>
+          new StringSelectMenuOptionBuilder()
+            .setLabel(`${acc.platform} - ${acc.url}`)
+            .setValue(`${acc.platform}|${acc.url}`)
+        )
+      );
+
+    const row = new ActionRowBuilder().addComponents(menu);
+
+    await interaction.reply({
+      embeds: [embed],
+      components: socials.length > 0 ? [row] : [],
+      ephemeral: true,
+    });
+  },
+};
