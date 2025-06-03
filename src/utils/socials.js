@@ -3,7 +3,7 @@ const path = require("path");
 
 const filePath = path.join(__dirname, "../data/socials.json");
 
-const allowedPlatforms = ["TikTok", "Instagram", "X"];
+const allowedPlatforms = ["tikTok", "instagram", "x"];
 
 function readData() {
     if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, JSON.stringify({}));
