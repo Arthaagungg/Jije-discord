@@ -54,13 +54,13 @@ module.exports = new Component({
 
     else if (selected === "edit") {
       // Ambil data sosial media user
-      const socials = await client.socialHandler.getUserSocials(interaction.user.id);
-      if (!socials || socials.length === 0) {
-        return interaction.reply({
-          content: "❌ Kamu belum punya sosial media yang bisa diedit.",
-          ephemeral: true
-        });
-      }
+      const userSocials = socialManager.getUserSocials(userId);
+        if (userSocials.length === 0) {
+            return interaction.reply({
+                content: '❌ Kamu belum punya sosial media untuk dikelola.',
+                ephemeral: true
+            });
+        }
 
       const modal = new ModalBuilder()
         .setCustomId("sosmed_modal_edit")
