@@ -1,4 +1,9 @@
-const { Modal, TextInputComponent, MessageActionRow } = require('discord.js');
+const {
+    ModalBuilder,
+    TextInputBuilder,
+    ActionRowBuilder,
+    TextInputStyle
+} = require('discord.js');
 const socialManager = require('../../utils/socialManager');
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
@@ -16,27 +21,27 @@ module.exports = new Component({
         const userId = interaction.user.id;
 
         if (action === 'add') {
-            const modal = new Modal()
+            const modal = new ModalBuilder()
                 .setCustomId('sosmed_modal_add')
                 .setTitle('➕ Tambah Sosial Media')
-                .addComponents([
-                    new MessageActionRow().addComponents(
-                        new TextInputComponent()
+                .addComponents(
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
                             .setCustomId('platform')
                             .setLabel('Platform (tiktok / instagram / x)')
                             .setPlaceholder('Misal: instagram')
                             .setRequired(true)
-                            .setStyle('SHORT')
+                            .setStyle(TextInputStyle.Short)
                     ),
-                    new MessageActionRow().addComponents(
-                        new TextInputComponent()
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
                             .setCustomId('url')
                             .setLabel('Link Sosial Media')
                             .setPlaceholder('https://...')
                             .setRequired(true)
-                            .setStyle('SHORT')
+                            .setStyle(TextInputStyle.Short)
                     )
-                ]);
+                );
             return interaction.showModal(modal);
         }
 
@@ -48,51 +53,46 @@ module.exports = new Component({
             });
         }
 
-        const choices = userSocials.map((entry, i) => ({
-            label: `${entry.platform} - ${entry.url}`,
-            value: `${entry.platform}::${entry.url}`.slice(0, 100) // limit Discord
-        }));
-
         if (action === 'edit') {
-            const modal = new Modal()
+            const modal = new ModalBuilder()
                 .setCustomId('sosmed_modal_edit')
                 .setTitle('✏️ Edit Sosial Media')
-                .addComponents([
-                    new MessageActionRow().addComponents(
-                        new TextInputComponent()
+                .addComponents(
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
                             .setCustomId('target')
                             .setLabel('Pilih (platform::url)')
                             .setPlaceholder('contoh: instagram::https://...')
                             .setRequired(true)
-                            .setStyle('SHORT')
+                            .setStyle(TextInputStyle.Short)
                     ),
-                    new MessageActionRow().addComponents(
-                        new TextInputComponent()
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
                             .setCustomId('newurl')
                             .setLabel('Ganti dengan link baru')
                             .setPlaceholder('https://...')
                             .setRequired(true)
-                            .setStyle('SHORT')
+                            .setStyle(TextInputStyle.Short)
                     )
-                ]);
+                );
             return interaction.showModal(modal);
         }
 
         if (action === 'remove') {
-            const modal = new Modal()
+            const modal = new ModalBuilder()
                 .setCustomId('sosmed_modal_remove')
                 .setTitle('🗑️ Hapus Sosial Media')
-                .addComponents([
-                    new MessageActionRow().addComponents(
-                        new TextInputComponent()
+                .addComponents(
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
                             .setCustomId('target')
                             .setLabel('Pilih (platform::url)')
                             .setPlaceholder('contoh: instagram::https://...')
                             .setRequired(true)
-                            .setStyle('SHORT')
+                            .setStyle(TextInputStyle.Short)
                     )
-                ]);
+                );
             return interaction.showModal(modal);
         }
     }
-}.JSON();
+}.JSON());
