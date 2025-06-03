@@ -19,8 +19,8 @@ module.exports = new Component({
    * @param {StringSelectMenuInteraction} interaction 
    */
   run: async (client, interaction) => {
-
-    const selected = interaction.values[0];
+  const selected = interaction.values[0];
+  const userId = interaction.user.id; // ✅ fix error
 
     if (selected === "add") {
       const modal = new ModalBuilder()
