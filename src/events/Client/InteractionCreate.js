@@ -1,7 +1,9 @@
 const { Events } = require("discord.js");
 
 /**
- * Fungsi bantu untuk mencari komponen berdasarkan customId (dukungan RegExp)
+ * Fungsi bantu untuk mencari komponen berdasarkan customId (support string & RegExp)
+ * @param {Map} collection 
+ * @param {string} customId 
  */
 function findComponent(collection, customId) {
   for (const comp of collection.values()) {
@@ -17,18 +19,18 @@ function findComponent(collection, customId) {
 
 module.exports = {
   name: Events.InteractionCreate,
+
   /**
    * 
-   * @param {import("../client/DiscordBot")} client 
+   * @param {import("../../client/DiscordBot")} client 
    * @param {import("discord.js").Interaction} interaction 
    */
   run: async (client, interaction) => {
     try {
-      // Slash command
+      // Slash Command
       if (interaction.isChatInputCommand()) {
         const command = client.collection.commands.get(interaction.commandName);
         if (!command) return;
-
         await command.run(client, interaction);
       }
 
@@ -36,7 +38,6 @@ module.exports = {
       else if (interaction.isContextMenuCommand()) {
         const command = client.collection.commands.get(interaction.commandName);
         if (!command) return;
-
         await command.run(client, interaction);
       }
 
@@ -44,7 +45,6 @@ module.exports = {
       else if (interaction.isAutocomplete()) {
         const component = client.collection.components.autocomplete.get(interaction.commandName);
         if (!component) return;
-
         await component.run(client, interaction);
       }
 
@@ -52,15 +52,13 @@ module.exports = {
       else if (interaction.isButton()) {
         const component = findComponent(client.collection.components.buttons, interaction.customId);
         if (!component) return;
-
         await component.run(client, interaction);
       }
 
-      // Select Menu
+      // Select Menu (Any)
       else if (interaction.isAnySelectMenu()) {
         const component = findComponent(client.collection.components.selects, interaction.customId);
         if (!component) return;
-
         await component.run(client, interaction);
       }
 
@@ -68,7 +66,6 @@ module.exports = {
       else if (interaction.isModalSubmit()) {
         const component = findComponent(client.collection.components.modals, interaction.customId);
         if (!component) return;
-
         await component.run(client, interaction);
       }
 
