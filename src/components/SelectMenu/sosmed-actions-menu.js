@@ -2,7 +2,7 @@ const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
 
 module.exports = new Component({
-    customId: "sosmed_action_menu:\\d+",
+    customId: "sosmed_action_menu",
     type: 'select',
     /**
      * 
