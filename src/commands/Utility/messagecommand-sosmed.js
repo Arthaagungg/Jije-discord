@@ -1,76 +1,42 @@
-const { Message } = require('discord.js');
-const DiscordBot = require('../../client/DiscordBot');
-const MessageCommand = require('../../structure/MessageCommand');
-const socialManager = require('../../utils/socialManager');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { getUserSocials } = require("../../Handlers/socialsHandler");
 
-/**
- * Format embed sosial media
- */
-function formatSocialEmbed(username, avatarURL, socials) {
-    const platformEmoji = {
-        instagram: '📸 Instagram',
-        tiktok: '🎵 TikTok',
-        x: '🐦 X'
-    };
+module.exports = {
+    name: "sosmed",
+    messageCommand: true,
 
-    const description = socials.length
-        ? socials.map((s, i) => `**${platformEmoji[s.platform] || s.platform}:** [Link](${s.url})`).join('\n')
-        : '_Belum menambahkan sosial media_';
+    async run({ message }) {
+        const user = message.mentions.users.first() || message.author;
+        const isSelf = user.id === message.author.id;
 
-    return {
-        color: 0x00B2FF,
-        title: `📱 Sosial Media ${username}`,
-        description,
-        thumbnail: { url: avatarURL },
-        timestamp: new Date()
-    };
-}
+        const socials = await getUserSocials(user.id);
 
-module.exports = new MessageCommand({
-    name: 'sosmed',
-    description: 'Menampilkan sosial media kamu atau user lain.',
-    aliases: ['social'],
-    permissions: ['SendMessages'],
-
-    options: {
-        cooldown: 5000
-    },
-
-    /**
-     * @param {DiscordBot} client 
-     * @param {Message} message 
-     * @param {string[]} args
-     */
-    run: async (client, message, args) => {
-        const targetUser = message.mentions.users.first() || message.author;
-        const socials = socialManager.getUserSocials(targetUser.id);
-
-        const embed = formatSocialEmbed(
-            targetUser.username,
-            targetUser.displayAvatarURL({ dynamic: true }),
-            socials
-        );
+        const embed = new EmbedBuilder()
+            .setColor("#00b0f4")
+            .setTitle(`🌐 Sosial Media ${user.username}`)
+            .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+            .setDescription(
+                socials.length > 0
+                    ? socials.map(s => `• **${s.platform}** → [@${s.username}](https://${s.platform.toLowerCase()}.com/${s.username})`).join("\n")
+                    : "*Belum ada sosial media yang ditambahkan.*"
+            )
+            .setFooter({ text: isSelf ? "Gunakan tombol di bawah untuk mengelola sosial media Anda." : " " });
 
         const components = [];
 
-        if (targetUser.id === message.author.id) {
-            components.push({
-                type: 1, // ActionRow
-                components: [
-                    {
-                        type: 2, // Button
-                        style: 1, // PRIMARY
-                        custom_id: `sosmed_manage`,
-                        label: 'Kelola Sosmed',
-                        emoji: { name: '⚙️' }
-                    }
-                ]
-            });
+        if (isSelf) {
+            components.push(new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("sosmed_manage")
+                    .setLabel("Kelola Sosial Media")
+                    .setEmoji("🛠️")
+                    .setStyle(ButtonStyle.Primary)
+            ));
         }
 
-        await message.reply({
+        return message.reply({
             embeds: [embed],
-            components
+            components,
         });
     }
-}).toJSON();
+}
