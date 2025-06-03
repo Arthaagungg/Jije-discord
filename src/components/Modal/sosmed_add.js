@@ -1,7 +1,9 @@
 const { ModalSubmitInteraction } = require("discord.js");
 const { addSocial, allowedPlatforms } = require("../../utils/socialManager");
 
-module.exports = {
+const Component = require("../../structure/Component");
+
+module.exports = new Component({
   customId: "add-sosmed",
   type: "modal",
   /**
@@ -45,4 +47,4 @@ module.exports = {
       ephemeral: true,
     });
   },
-};
+}).toJSON();
