@@ -1,0 +1,37 @@
+const { ModalSubmitInteraction } = require("discord.js"); const DiscordBot = require("../../client/DiscordBot"); const Component = require("../../structure/Component");
+
+module.exports = new Component({ customId: "sosmed_modal_edit", type: "modal",
+
+/**
+
+@param {DiscordBot} client
+
+@param {ModalSubmitInteraction} interaction */ run: async (client, interaction) => { const socials = await client.socialHandler.getUserSocials(interaction.user.id); if (!socials || socials.length === 0) { return interaction.reply({ content: "❌ Tidak ada sosial media yang bisa diedit.", ephemeral: true }); }
+
+
+let updated = 0;
+
+for (let i = 0; i < socials.length; i++) {
+  const fieldId = `edit_${socials[i].platform}_${i}`;
+  const newUsername = interaction.fields.getTextInputValue(fieldId)?.trim();
+
+  if (newUsername && newUsername !== socials[i].username) {
+    await client.socialHandler.editSocial(interaction.user.id, socials[i].platform, socials[i].username, newUsername);
+    updated++;
+  }
+}
+
+if (updated === 0) {
+  return interaction.reply({
+    content: "⚠️ Tidak ada perubahan yang dilakukan.",
+    ephemeral: true
+  });
+}
+
+return interaction.reply({
+  content: `✅ Berhasil mengedit ${updated} sosial media!`,
+  ephemeral: true
+});
+
+} }).toJSON();
+
