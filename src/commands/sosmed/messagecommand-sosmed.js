@@ -1,19 +1,18 @@
-
-const { ChatInputCommandInteraction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js"); const DiscordBot = require("../../client/DiscordBot"); const ApplicationCommand = require("../../structure/MessageCommand"); const path = require("path"); const fs = require("fs");
+const { Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js"); const DiscordBot = require("../../client/DiscordBot"); const MessageCommand = require("../../structure/MessageCommand"); const path = require("path"); const fs = require("fs");
 
 const dbPath = path.join(__dirname, "../../database/sosmed.json"); function loadData() { if (!fs.existsSync(dbPath)) return {}; return JSON.parse(fs.readFileSync(dbPath)); } function saveData(data) { fs.writeFileSync(dbPath, JSON.stringify(data, null, 2)); }
 
-module.exports = new MessageCommand({ command: { name: "sosmed", description: "Tampilkan sosial media kamu atau user lain", type: 1, options: [ { name: "user", type: 6, // USER description: "User lain", required: false, }, ], }, options: { cooldown: 3000, },
-
-/**
+module.exports = new MessageCommand({ command: { name: "sosmed", description: "Tampilkan sosial media kamu atau user lain.", aliases: [] }, options: { cooldown: 3000 }, /**
 
 @param {DiscordBot} client
 
-@param {ChatInputCommandInteraction} interaction */ run: async (client, interaction) => { const user = interaction.options.getUser("user") || interaction.user; const data = loadData(); const accounts = data[user.id] || [];
+@param {Message} message
+
+@param {string[]} args */ run: async (client, message, args) => { const target = message.mentions.users.first() || message.author; const data = loadData(); const accounts = data[target.id] || [];
 
 
 const embed = new EmbedBuilder()
-  .setTitle(`Sosial Media ${user.username}`)
+  .setTitle(`Sosial Media ${target.username}`)
   .setColor("Random")
   .setDescription(
     accounts.length > 0
@@ -31,15 +30,15 @@ const embed = new EmbedBuilder()
 
 const row = new ActionRowBuilder().addComponents(
   new ButtonBuilder()
-    .setCustomId(`sosmed-manage-${user.id}`)
+    .setCustomId(`sosmed-manage-${message.author.id}`)
     .setLabel("Kelola Sosmed")
     .setStyle(ButtonStyle.Primary)
-    .setDisabled(user.id !== interaction.user.id) // hanya bisa kelola diri sendiri
+    .setDisabled(target.id !== message.author.id)
 );
 
-await interaction.reply({ embeds: [embed], components: [row] });
+await message.reply({ embeds: [embed], components: [row] });
 
-}, });
+} }).toJSON();
 
 function generateUrl(platform, username) { switch (platform.toLowerCase()) { case "instagram": return https://instagram.com/${username}; case "tiktok": return https://tiktok.com/@${username}; case "x": return https://x.com/${username}; default: return username; } }
 
