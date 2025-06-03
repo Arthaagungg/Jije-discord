@@ -28,4 +28,8 @@ module.exports = new Modal({
         socialManager.addSocial(interaction.user.id, platform, url);
 
         await interaction.reply({
-            content: `✅ ${platform.charAt(
+            content: `✅ ${platform.charAt(0).toUpperCase() + platform.slice(1)} berhasil ditambahkan.`,
+            ephemeral: true
+        });
+    }
+}).toJSON();
