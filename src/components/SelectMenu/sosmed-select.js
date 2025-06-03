@@ -90,4 +90,4 @@ module.exports = new Component({
             return interaction.showModal(modal);
         }
     }
-}.JSON());
+}.toJSON());
