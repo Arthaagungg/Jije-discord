@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const filePath = path.join(__dirname, '../data/socials.json');
+const filePath = path.join(__dirname, '../data/sosmed.json');
 const allowedPlatforms = ['tiktok', 'instagram', 'x'];
 
 /**
