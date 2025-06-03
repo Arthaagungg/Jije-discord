@@ -20,7 +20,7 @@ function getUserSocials(userId) {
 }
 
 function addSocial(userId, platform, username) {
-    if (!allowedPlatforms.includes(platform)) throw new Error("Platform tidak valid.");
+   // if (!allowedPlatforms.includes(platform)) throw new Error("Platform tidak valid.");
 
     const data = readData();
     if (!data[userId]) data[userId] = [];
