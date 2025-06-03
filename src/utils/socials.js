@@ -1,63 +1,50 @@
-const fs = require("fs");
-const path = require("path");
-const { autoPushGit } = require("./git");
+const supabase = require("./supabase");
 
-const filePath = path.join(__dirname, "../data/socials.json");
-const allowedPlatforms = ["tiktok", "instagram", "x"];
+const allowedPlatforms = ["instagram", "tiktok", "x"];
 
-function readData() {
-    if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, JSON.stringify({}));
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+async function getUserSocials(userId) {
+    const { data, error } = await supabase
+        .from("socials")
+        .select("*")
+        .eq("user_id", userId);
+
+    if (error) throw error;
+    return data;
 }
 
-function writeData(data) {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-}
-
-function getUserSocials(userId) {
-    const data = readData();
-    return data[userId] || [];
-}
-
-function addSocial(userId, platform, username) {
-  //  if (!allowedPlatforms.includes(platform)) throw new Error("Platform tidak valid.");
-
-    const data = readData();
-    if (!data[userId]) data[userId] = [];
+async function addSocial(userId, platform, username) {
+    if (!allowedPlatforms.includes(platform)) throw new Error("Platform tidak valid");
 
     const url = `https://${platform}.com/${username}`;
-    data[userId].push({ platform, url });
 
-    writeData(data);
-    autoPushGit(`[AUTO] ${userId} menambahkan sosial media ${platform}`);
+    const { error } = await supabase
+        .from("socials")
+        .insert([{ user_id: userId, platform, url }]);
+
+    if (error) throw error;
 }
 
-function editSocial(userId, platform, newUsername) {
-    const data = readData();
-    const userData = data[userId];
-    if (!userData) return false;
+async function editSocial(userId, platform, newUsername) {
+    const url = `https://${platform}.com/${newUsername}`;
 
-    const account = userData.find(s => s.platform === platform);
-    if (!account) return false;
+    const { error } = await supabase
+        .from("socials")
+        .update({ url })
+        .eq("user_id", userId)
+        .eq("platform", platform);
 
-    account.url = `https://${platform}.com/${newUsername}`;
-    writeData(data);
-    autoPushGit(`[AUTO] ${userId} mengubah sosial media ${platform}`);
-    return true;
+    if (error) throw error;
 }
 
-function removeSocial(userId, platform, url) {
-    const data = readData();
-    const userData = data[userId];
-    if (!userData) return false;
+async function removeSocial(userId, platform, url) {
+    const { error } = await supabase
+        .from("socials")
+        .delete()
+        .eq("user_id", userId)
+        .eq("platform", platform)
+        .eq("url", url);
 
-    const index = userData.findIndex(s => s.platform === platform && s.url === url);
-    if (index === -1) return false;
-
-    userData.splice(index, 1);
-    writeData(data);
-    autoPushGit(`[AUTO] ${userId} menghapus sosial media ${platform}`);
-    return true;
+    if (error) throw error;
 }
 
 module.exports = {
