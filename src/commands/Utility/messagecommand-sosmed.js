@@ -1,7 +1,7 @@
-const { Message, MessageMentions } = require('discord.js');
+const { Message } = require('discord.js');
 const DiscordBot = require('../../client/DiscordBot');
 const MessageCommand = require('../../structure/MessageCommand');
-const socialManager = require('../../utils/sosmedStorage');
+const socialManager = require('../../utils/socialManager');
 
 /**
  * Format embed sosial media
@@ -17,32 +17,24 @@ function formatSocialEmbed(username, avatarURL, socials) {
         ? socials.map((s, i) => `**${platformEmoji[s.platform] || s.platform}:** [Link](${s.url})`).join('\n')
         : '_Belum menambahkan sosial media_';
 
-
-
-
-
     return {
         color: 0x00B2FF,
         title: `📱 Sosial Media ${username}`,
         description,
-        thumbnail: {
-            url: avatarURL
-        },
+        thumbnail: { url: avatarURL },
         timestamp: new Date()
     };
 }
 
 module.exports = new MessageCommand({
-    command: {
-        name: 'sosmed',
-        description: 'Menampilkan sosial media kamu atau user lain.',
-        aliases: ['social'],
-        permissions: ['SendMessages']
-    },
+    name: 'sosmed',
+    description: 'Menampilkan sosial media kamu atau user lain.',
+    aliases: ['social'],
+    permissions: ['SendMessages'],
+
     options: {
         cooldown: 5000
     },
-
 
     /**
      * @param {DiscordBot} client 
@@ -61,13 +53,6 @@ module.exports = new MessageCommand({
 
         const components = [];
 
-
-
-
-
-
-
-        // Tampilkan tombol hanya jika user mengecek sosial media sendiri
         if (targetUser.id === message.author.id) {
             components.push({
                 type: 1, // ActionRow
@@ -87,8 +72,5 @@ module.exports = new MessageCommand({
             embeds: [embed],
             components
         });
-
-
-
     }
 }).toJSON();
