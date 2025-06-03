@@ -9,7 +9,7 @@ const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
 
 module.exports = new Component({
-  customId: /^sosmed_action_menu_\d+$/, // support dynamic user ID
+  customId: 'sosmed_action_menu', // support dynamic user ID
   type: "select",
 
   /**
@@ -18,11 +18,6 @@ module.exports = new Component({
    * @param {StringSelectMenuInteraction} interaction 
    */
   run: async (client, interaction) => {
-    const [_, action, userId] = interaction.customId.split(":");
-
-    if (interaction.user.id !== userId) {
-      return interaction.reply({ content: `❌ Ini bukan menu milik kamu (expected: ${userId} , ${interaction.user.id}).`, ephemeral: true });
-    }
 
     const selected = interaction.values[0];
 
