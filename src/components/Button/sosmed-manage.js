@@ -52,7 +52,7 @@ module.exports = new Component({
 
     const row2 = new ActionRowBuilder().addComponents(disabledButton);
 
-    const reply = await interaction.update({
+    const reply = await interaction.editReply({
       content: "Pilih aksi yang ingin kamu lakukan:",
       components: [row1, row2],
     });
