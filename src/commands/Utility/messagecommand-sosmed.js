@@ -1,9 +1,9 @@
 const { ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
-const ApplicationCommand = require("../../structure/ApplicationCommand");
 const { getUserSocials } = require("../../utils/sosmedStorage");
+const MessageCommand = require("../../structure/MessageCommand");
 
-module.exports = new ApplicationCommand({
+module.exports = new MessageCommand({
     command: {
         name: 'sosmed',
         description: 'Lihat sosial media kamu atau orang lain',
