@@ -11,6 +11,7 @@
   "author": "TFAGaming",
   "license": "GPL-3.0",
   "dependencies": {
+     "@supabase/supabase-js": "^2.39.5",
     "@discordjs/voice": "^0.18.0",
     "google-tts-api": "^2.0.1",
     "axios": "^1.9.0",
