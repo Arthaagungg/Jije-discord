@@ -9,7 +9,7 @@ const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
 
 module.exports = new Component({
-  customId: 'sosmed_action_menu', // support dynamic user ID
+  customId: /^sosmed_action_menu_\d+$/, // support dynamic user ID
   type: "select",
 
   /**
