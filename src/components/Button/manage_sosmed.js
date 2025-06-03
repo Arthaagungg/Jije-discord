@@ -1,7 +1,8 @@
 const {
     ButtonInteraction,
     ActionRowBuilder,
-    StringSelectMenuBuilder
+    StringSelectMenuBuilder,
+    ComponentType
 } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
@@ -15,7 +16,7 @@ module.exports = new Component({
      * @param {ButtonInteraction} interaction 
      */
     run: async (client, interaction) => {
-        // Cegah orang lain klik tombol yang bukan miliknya
+        // Cek apakah user yang klik adalah pemilik original
         const messageUserId =
             interaction.message.interaction?.user?.id ||
             interaction.message.mentions?.users?.first()?.id ||
@@ -54,25 +55,26 @@ module.exports = new Component({
                 ])
         );
 
-        // Safe reply with fallback to followUp
         try {
-            await interaction.reply({
-                content: 'Silakan pilih aksi yang ingin kamu lakukan:',
-                components: [row],
-                ephemeral: true
-            });
-        } catch (err) {
-            if (err.code === 10062) {
-                // Unknown interaction (sudah dismissed), gunakan followUp
-                return interaction.followUp({
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({
                     content: 'Silakan pilih aksi yang ingin kamu lakukan:',
                     components: [row],
                     ephemeral: true
                 });
             } else {
-                console.error("❌ Gagal merespon tombol sosmed_manage:", err);
-                return interaction.followUp({
-                    content: '❌ Terjadi kesalahan saat menampilkan menu sosial media.',
+                await interaction.reply({
+                    content: 'Silakan pilih aksi yang ingin kamu lakukan:',
+                    components: [row],
+                    ephemeral: true
+                });
+            }
+        } catch (err) {
+            console.error('❌ Gagal mengirim reply sosmed_manage:', err);
+            // Optional: tampilkan pesan error ke user
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({
+                    content: '⚠️ Terjadi kesalahan saat memproses interaksi ini.',
                     ephemeral: true
                 });
             }
