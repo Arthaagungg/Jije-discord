@@ -7,6 +7,7 @@ const {
 } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
+const getUserSocials = require('../../utils/socials');
 
 module.exports = new Component({
   customId: 'sosmed_action_menu', // support dynamic user ID
