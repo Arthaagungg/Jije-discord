@@ -12,7 +12,7 @@ const Component = require("../../structure/Component");
  * @type {import('discord.js').ButtonInteractionHandler}
  */
 module.exports = new Component({
-  customId: /^sosmed-manage-(\d+)$/,
+  customId: "sosmed-manage",
   type: "button",
   run: async (interaction) => {
     const [, userId] = interaction.customId.match(/^sosmed-manage-(\d+)$/);
