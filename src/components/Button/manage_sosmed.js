@@ -1,4 +1,4 @@
-const { ButtonInteraction } = require("discord.js");
+const { ButtonInteraction, MessageActionRow, MessageSelectMenu } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
 
