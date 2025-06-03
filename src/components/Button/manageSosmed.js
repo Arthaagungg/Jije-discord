@@ -6,11 +6,12 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 const { getUserSocials, allowedPlatforms } = require("../../utils/socialManager");
+const Component = require("../../structure/Component");
 
 /**
  * @type {import('discord.js').ButtonInteractionHandler}
  */
-module.exports = {
+module.exports = new Component({
   customId: /^sosmed-manage-(\d+)$/,
   type: "button",
   run: async (interaction) => {
@@ -55,4 +56,4 @@ module.exports = {
       ephemeral: true,
     });
   },
-};
+}).toJSON();
