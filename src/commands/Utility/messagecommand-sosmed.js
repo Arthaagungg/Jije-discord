@@ -50,8 +50,12 @@ module.exports = new MessageCommand({
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
           .setCustomId("sosmed-manage")
-        .setLabel("Kelola Sosmed")
-          .setStyle(ButtonStyle.Primary)
+          .setLabel("Kelola Sosmed")
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+          .setCustomId("sosmed-add")
+          .setLabel("➕ Input Sosmed")
+          .setStyle(ButtonStyle.Secondary)
       );
       components.push(row);
     }
