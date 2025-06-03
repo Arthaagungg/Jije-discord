@@ -1,7 +1,9 @@
 const { ModalSubmitInteraction } = require("discord.js");
 const { editSocial, removeSocial } = require("../../utils/socialManager");
 
-module.exports = {
+const Component = require("../../structure/Component");
+
+module.exports = new Component({
   customId: /^edit-sosmed-(.+)\|(.+)$/, // Gunakan regex agar dynamic
   type: "modal",
   /**
@@ -35,4 +37,4 @@ module.exports = {
       });
     }
   },
-};
+}).toJSON();
