@@ -1,78 +1,62 @@
 const fs = require('fs');
 const path = require('path');
-const filePath = path.join(__dirname, '../data/sosmed.json');
 
-// Pastikan file JSON-nya selalu ada
-function ensureFile() {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, '{}');
-  }
+const dataPath = path.join(__dirname, '../data/sosmed.json');
+
+// Load data
+function load() {
+    if (!fs.existsSync(dataPath)) fs.writeFileSync(dataPath, '{}');
+    const raw = fs.readFileSync(dataPath);
+    return JSON.parse(raw);
 }
 
-function readData() {
-  ensureFile();
-  const data = fs.readFileSync(filePath, 'utf8');
-  return JSON.parse(data);
+// Simpan data
+function save(data) {
+    fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
 }
 
-function writeData(data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-}
-
-// Ambil semua sosial media user
+// Ambil data user
 function getUserSocials(userId) {
-  const data = readData();
-  return data[userId] || {};
+    const db = load();
+    return db[userId] || {};
 }
 
-// Tambahkan sosial media (bisa banyak per platform)
+// Tambah akun
 function addUserSocial(userId, platform, url) {
-  const data = readData();
-  if (!data[userId]) data[userId] = {};
-  if (!data[userId][platform]) data[userId][platform] = [];
-  data[userId][platform].push(url);
-  writeData(data);
+    const db = load();
+    if (!db[userId]) db[userId] = {};
+    if (!db[userId][platform]) db[userId][platform] = [];
+    db[userId][platform].push(url);
+    save(db);
 }
 
-// Edit sosial media berdasarkan index di platform
+// Edit akun
 function editUserSocial(userId, platform, index, newUrl) {
-  const data = readData();
-  if (
-    data[userId] &&
-    data[userId][platform] &&
-    data[userId][platform][index] !== undefined
-  ) {
-    data[userId][platform][index] = newUrl;
-    writeData(data);
-    return true;
-  }
-  return false;
+    const db = load();
+    if (db[userId] && db[userId][platform] && db[userId][platform][index]) {
+        db[userId][platform][index] = newUrl;
+        save(db);
+        return true;
+    }
+    return false;
 }
 
-// Hapus sosial media berdasarkan index di platform
+// Hapus akun
 function removeUserSocial(userId, platform, index) {
-  const data = readData();
-  if (
-    data[userId] &&
-    data[userId][platform] &&
-    data[userId][platform][index] !== undefined
-  ) {
-    data[userId][platform].splice(index, 1);
-    if (data[userId][platform].length === 0) {
-      delete data[userId][platform];
+    const db = load();
+    if (db[userId] && db[userId][platform] && db[userId][platform][index]) {
+        db[userId][platform].splice(index, 1);
+        if (db[userId][platform].length === 0) delete db[userId][platform];
+        if (Object.keys(db[userId]).length === 0) delete db[userId];
+        save(db);
+        return true;
     }
-    if (Object.keys(data[userId]).length === 0) {
-      delete data[userId];
-    }
-    writeData(data);
-    return true;
-  }
-  return false;
+    return false;
 }
 
 module.exports = {
-  getUserSocials,
-  addUserSocial,
-  editUserSocial,
-  removeUserSocial,
+    getUserSocials,
+    addUserSocial,
+    editUserSocial,
+    removeUserSocial
 };
