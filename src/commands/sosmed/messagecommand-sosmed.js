@@ -1,4 +1,5 @@
-// File: src/commands/sosmed.js const { ChatInputCommandInteraction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js"); const DiscordBot = require("../../client/DiscordBot"); const ApplicationCommand = require("../../structure/ApplicationCommand"); const path = require("path"); const fs = require("fs");
+
+const { ChatInputCommandInteraction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js"); const DiscordBot = require("../../client/DiscordBot"); const ApplicationCommand = require("../../structure/ApplicationCommand"); const path = require("path"); const fs = require("fs");
 
 const dbPath = path.join(__dirname, "../../database/sosmed.json"); function loadData() { if (!fs.existsSync(dbPath)) return {}; return JSON.parse(fs.readFileSync(dbPath)); } function saveData(data) { fs.writeFileSync(dbPath, JSON.stringify(data, null, 2)); }
 
