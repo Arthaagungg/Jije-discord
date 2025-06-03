@@ -24,7 +24,7 @@ function getUserSocials(userId) {
 }
 
 function addSocial(userId, platform, username) {
-  if (!platformUrlPrefixes[platform]) throw new Error("Platform tidak valid.");
+ // if (!platformUrlPrefixes[platform]) throw new Error("Platform tidak valid.");
   const url = platformUrlPrefixes[platform] + username;
 
   const data = readData();
