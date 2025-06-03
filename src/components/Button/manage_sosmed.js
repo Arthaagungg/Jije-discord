@@ -4,7 +4,7 @@ const Component = require("../../structure/Component");
 
 module.exports = new Component({
     customId: /^sosmed_manage_(\d+)$/,
-    
+    type: 'button',
     /**
      * 
      * @param {DiscordBot} client 
