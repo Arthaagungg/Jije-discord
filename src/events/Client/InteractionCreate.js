@@ -1,4 +1,4 @@
-const { Events } = require("discord.js");
+const Event = require("../../structure/Event");
 
 /**
  * Fungsi bantu untuk mencari komponen berdasarkan customId (support string & RegExp)
@@ -17,8 +17,8 @@ function findComponent(collection, customId) {
   return null;
 }
 
-module.exports = {
-  name: Events.InteractionCreate,
+module.exports = new Event({
+  name: 'InteractionCreate',
 
   /**
    * 
