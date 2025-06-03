@@ -3,7 +3,7 @@ const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
 
 module.exports = new Component({
-    customId: /^sosmed_manage_(\d+)$/,
+    customId: 'sosmed_manage',
     type: 'button',
     /**
      * 
@@ -11,14 +11,6 @@ module.exports = new Component({
      * @param {ButtonInteraction} interaction 
      */
     run: async (client, interaction) => {
-        const [, targetUserId] = interaction.customId.match(/^sosmed_manage_(\d+)$/);
-
-        if (interaction.user.id !== targetUserId) {
-            return interaction.reply({
-                content: '❌ Kamu tidak bisa mengelola sosial media milik orang lain.',
-                ephemeral: true
-            });
-        }
 
         const row = new MessageActionRow().addComponents(
             new MessageSelectMenu()
