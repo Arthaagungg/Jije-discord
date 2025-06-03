@@ -24,7 +24,12 @@ async function getUserSocials(userId) {
         .select("*")
         .eq("user_id", userId);
 
-    if (error) throw error;
+    if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+    }
+
+    console.log("Data socials:", data);
     return data;
 }
 
