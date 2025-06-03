@@ -17,6 +17,13 @@ module.exports = new Component({
      * @param {import("discord.js").AnySelectMenuInteraction} interaction 
      */
     run: async (client, interaction) => {
+        if (!interaction.values || interaction.values.length === 0) {
+            return interaction.reply({
+                content: 'Tidak ada pilihan yang dipilih.',
+                ephemeral: true
+            });
+        }
+
         const action = interaction.values[0]; // 'add', 'edit', 'remove'
         const userId = interaction.user.id;
 
@@ -42,11 +49,18 @@ module.exports = new Component({
                             .setStyle(TextInputStyle.Short)
                     )
                 );
+
             return interaction.showModal(modal);
         }
 
         const userSocials = socialManager.getUserSocials(userId);
-        
+
+        if (!userSocials || userSocials.length === 0) {
+            return interaction.reply({
+                content: 'Kamu belum menambahkan sosial media apa pun.',
+                ephemeral: true
+            });
+        }
 
         if (action === 'edit') {
             const modal = new ModalBuilder()
@@ -57,7 +71,7 @@ module.exports = new Component({
                         new TextInputBuilder()
                             .setCustomId('target')
                             .setLabel('Pilih (platform::url)')
-                            .setPlaceholder('contoh: instagram::https://...')
+                            .setPlaceholder('Contoh: instagram::https://...')
                             .setRequired(true)
                             .setStyle(TextInputStyle.Short)
                     ),
@@ -70,6 +84,7 @@ module.exports = new Component({
                             .setStyle(TextInputStyle.Short)
                     )
                 );
+
             return interaction.showModal(modal);
         }
 
@@ -82,12 +97,18 @@ module.exports = new Component({
                         new TextInputBuilder()
                             .setCustomId('target')
                             .setLabel('Pilih (platform::url)')
-                            .setPlaceholder('contoh: instagram::https://...')
+                            .setPlaceholder('Contoh: instagram::https://...')
                             .setRequired(true)
                             .setStyle(TextInputStyle.Short)
                     )
                 );
+
             return interaction.showModal(modal);
         }
+
+        return interaction.reply({
+            content: 'Aksi tidak dikenali.',
+            ephemeral: true
+        });
     }
 }.toJSON());
