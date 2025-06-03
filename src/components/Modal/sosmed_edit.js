@@ -1,30 +1,38 @@
-// Sama persis seperti sosmed_add.js tapi ada tambahan pengecekan
-module.exports = new Component({
-    customId: 'sosmed_edit',
-    type: 'modal',
+const { ModalSubmitInteraction } = require("discord.js");
+const { editSocial, removeSocial } = require("../../utils/socialManager");
 
-    /**
-     * @param {DiscordBot} client 
-     * @param {ModalSubmitInteraction} interaction 
-     */
-    run: async (client, interaction) => {
-        const platform = interaction.fields.getTextInputValue("platform");
-        const username = interaction.fields.getTextInputValue("username");
+module.exports = {
+  customId: /^edit-sosmed-(.+)\|(.+)$/, // Gunakan regex agar dynamic
+  type: "modal",
+  /**
+   * @param {ModalSubmitInteraction} interaction
+   */
+  run: async (interaction) => {
+    const match = interaction.customId.match(/^edit-sosmed-(.+)\|(.+)$/);
+    if (!match) return;
 
-        const sosmed = load();
-        if (!sosmed[interaction.user.id] || !sosmed[interaction.user.id][platform]) {
-            return await interaction.reply({
-                content: `⚠️ Platform ${platform} tidak ditemukan.`,
-                ephemeral: true
-            });
-        }
+    const [, platform, oldUrl] = match;
+    const newUrl = interaction.fields.getTextInputValue("newUrl");
 
-        sosmed[interaction.user.id][platform] = username;
-        save(sosmed);
-
-        await interaction.reply({
-            content: `📝 Sosial media **${platform}** telah diperbarui: ${username}`,
-            ephemeral: true
-        });
+    let success = false;
+    if (newUrl.trim()) {
+      success = editSocial(interaction.user.id, platform, oldUrl, newUrl.trim());
+    } else {
+      success = removeSocial(interaction.user.id, platform, oldUrl);
     }
-}).toJSON();
+
+    if (success) {
+      await interaction.reply({
+        content: newUrl.trim()
+          ? `✅ Sosial media **${platform}** berhasil diubah.`
+          : `✅ Sosial media **${platform}** berhasil dihapus.`,
+        ephemeral: true,
+      });
+    } else {
+      await interaction.reply({
+        content: `❌ Gagal memproses sosial media.`,
+        ephemeral: true,
+      });
+    }
+  },
+};
