@@ -6,15 +6,8 @@ const Event = require("../../structure/Event");
  * @param {string} customId 
  */
 function findComponent(collection, customId) {
-  for (const comp of collection.values()) {
-    if (
-      typeof comp.customId === "string" && comp.customId === customId ||
-      comp.customId instanceof RegExp && comp.customId.test(customId)
-    ) {
-      return comp;
-    }
-  }
-  return null;
+  const prefix = customId.split(":")[0];
+  return collection.get(prefix);
 }
 
 module.exports = new Event({
