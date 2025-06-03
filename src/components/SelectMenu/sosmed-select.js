@@ -1,114 +1,99 @@
-const {
-    ModalBuilder,
-    TextInputBuilder,
-    ActionRowBuilder,
-    TextInputStyle
-} = require('discord.js');
+const { Modal, TextInputComponent, MessageActionRow } = require('discord.js');
 const socialManager = require('../../utils/socialManager');
+
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
 
 module.exports = new Component({
     customId: 'sosmed_select',
-    type: 'select',
+type: 'select',
     /**
      * 
      * @param {DiscordBot} client 
      * @param {import("discord.js").AnySelectMenuInteraction} interaction 
      */
     run: async (client, interaction) => {
-        if (!interaction.values || interaction.values.length === 0) {
-            return interaction.reply({
-                content: 'Tidak ada pilihan yang dipilih.',
-                ephemeral: true
-            });
-        }
-
         const action = interaction.values[0]; // 'add', 'edit', 'remove'
         const userId = interaction.user.id;
 
         if (action === 'add') {
-            const modal = new ModalBuilder()
+            const modal = new Modal()
                 .setCustomId('sosmed_modal_add')
                 .setTitle('➕ Tambah Sosial Media')
-                .addComponents(
-                    new ActionRowBuilder().addComponents(
-                        new TextInputBuilder()
+                .addComponents([
+                    new MessageActionRow().addComponents(
+                        new TextInputComponent()
                             .setCustomId('platform')
                             .setLabel('Platform (tiktok / instagram / x)')
                             .setPlaceholder('Misal: instagram')
                             .setRequired(true)
-                            .setStyle(TextInputStyle.Short)
+                            .setStyle('SHORT')
                     ),
-                    new ActionRowBuilder().addComponents(
-                        new TextInputBuilder()
+                    new MessageActionRow().addComponents(
+                        new TextInputComponent()
                             .setCustomId('url')
                             .setLabel('Link Sosial Media')
                             .setPlaceholder('https://...')
                             .setRequired(true)
-                            .setStyle(TextInputStyle.Short)
+                            .setStyle('SHORT')
                     )
-                );
-
+                ]);
             return interaction.showModal(modal);
         }
 
         const userSocials = socialManager.getUserSocials(userId);
-
-        if (!userSocials || userSocials.length === 0) {
+        if (userSocials.length === 0) {
             return interaction.reply({
-                content: 'Kamu belum menambahkan sosial media apa pun.',
+                content: '❌ Kamu belum punya sosial media untuk dikelola.',
                 ephemeral: true
             });
         }
 
+        const choices = userSocials.map((entry, i) => ({
+            label: `${entry.platform} - ${entry.url}`,
+            value: `${entry.platform}::${entry.url}`.slice(0, 100) // limit Discord
+        }));
+
         if (action === 'edit') {
-            const modal = new ModalBuilder()
+            const modal = new Modal()
                 .setCustomId('sosmed_modal_edit')
                 .setTitle('✏️ Edit Sosial Media')
-                .addComponents(
-                    new ActionRowBuilder().addComponents(
-                        new TextInputBuilder()
+                .addComponents([
+                    new MessageActionRow().addComponents(
+                        new TextInputComponent()
                             .setCustomId('target')
                             .setLabel('Pilih (platform::url)')
-                            .setPlaceholder('Contoh: instagram::https://...')
+                            .setPlaceholder('contoh: instagram::https://...')
                             .setRequired(true)
-                            .setStyle(TextInputStyle.Short)
+                            .setStyle('SHORT')
                     ),
-                    new ActionRowBuilder().addComponents(
-                        new TextInputBuilder()
+                    new MessageActionRow().addComponents(
+                        new TextInputComponent()
                             .setCustomId('newurl')
                             .setLabel('Ganti dengan link baru')
                             .setPlaceholder('https://...')
                             .setRequired(true)
-                            .setStyle(TextInputStyle.Short)
+                            .setStyle('SHORT')
                     )
-                );
-
+                ]);
             return interaction.showModal(modal);
         }
 
         if (action === 'remove') {
-            const modal = new ModalBuilder()
+            const modal = new Modal()
                 .setCustomId('sosmed_modal_remove')
                 .setTitle('🗑️ Hapus Sosial Media')
-                .addComponents(
-                    new ActionRowBuilder().addComponents(
-                        new TextInputBuilder()
+                .addComponents([
+                    new MessageActionRow().addComponents(
+                        new TextInputComponent()
                             .setCustomId('target')
                             .setLabel('Pilih (platform::url)')
-                            .setPlaceholder('Contoh: instagram::https://...')
+                            .setPlaceholder('contoh: instagram::https://...')
                             .setRequired(true)
-                            .setStyle(TextInputStyle.Short)
+                            .setStyle('SHORT')
                     )
-                );
-
+                ]);
             return interaction.showModal(modal);
         }
-
-        return interaction.reply({
-            content: 'Aksi tidak dikenali.',
-            ephemeral: true
-        });
     }
-}.toJSON());
+}).toJSON();
