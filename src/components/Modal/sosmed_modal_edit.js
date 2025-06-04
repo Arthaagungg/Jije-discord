@@ -23,13 +23,12 @@ module.exports = new Component({
 
     let updated = 0;
 
-    for (let i = 0; i < socials.length; i++) {
-      const social = socials[i];
-      const fieldId = `edit_${social.platform}_${social.username}`;
+    for (let social of socials) {
+      const fieldId = `edit_${social.id}`;
       const newUsername = interaction.fields.getTextInputValue(fieldId)?.trim();
 
       if (newUsername && newUsername !== social.username) {
-        await socialManager.editSocial(interaction.user.id, social.platform, social.username, newUsername);
+        await socialManager.editSocial(interaction.user.id, social.platform, newUsername);
         updated++;
       }
     }
