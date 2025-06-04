@@ -7,10 +7,10 @@ const {
 } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
-const socialManager = require("../../utils/socials");
+const socialManager = require('../../utils/socials');
 
 module.exports = new Component({
-  customId: "sosmed_action_menu",
+  customId: 'sosmed_action_menu',
   type: "select",
 
   /**
@@ -31,7 +31,6 @@ module.exports = new Component({
               .setCustomId("platform")
               .setLabel("Nama Sosial Media (tiktok, instagram, x)")
               .setStyle(TextInputStyle.Short)
-              .setPlaceholder("tiktok")
               .setRequired(true)
           ),
           new ActionRowBuilder().addComponents(
@@ -39,7 +38,6 @@ module.exports = new Component({
               .setCustomId("username")
               .setLabel("Username")
               .setStyle(TextInputStyle.Short)
-              .setPlaceholder("Hanya username, tanpa link")
               .setRequired(true)
           )
         );
@@ -52,7 +50,7 @@ module.exports = new Component({
 
       if (!socials || socials.length === 0) {
         return interaction.reply({
-          content: "❌ Kamu belum punya sosial media untuk diedit.",
+          content: '❌ Kamu belum punya sosial media untuk diedit.',
           ephemeral: true
         });
       }
@@ -61,18 +59,17 @@ module.exports = new Component({
         .setCustomId("sosmed_modal_edit")
         .setTitle("Edit Sosial Media");
 
-      const components = socials.slice(0, 5).map((social, idx) =>
-        new ActionRowBuilder().addComponents(
+      const components = socials.slice(0, 5).map((social, idx) => {
+        return new ActionRowBuilder().addComponents(
           new TextInputBuilder()
-            .setCustomId(`edit_${social.platform}_${idx}`)
-            .setLabel(`${social.platform} (sekarang: ${social.username})`)
+            .setCustomId(`edit_${social.platform}_${social.username}`)
+            .setLabel(`${social.platform} (@${social.username})`)
             .setStyle(TextInputStyle.Short)
             .setRequired(false)
-        )
-      );
+        );
+      });
 
       modal.addComponents(...components);
-
       await interaction.showModal(modal);
     }
 
