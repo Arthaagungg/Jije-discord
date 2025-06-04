@@ -1,4 +1,4 @@
-const {More actions
+const {
   EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
