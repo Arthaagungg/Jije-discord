@@ -4,14 +4,10 @@ const allowedPlatforms = ["instagram", "tiktok", "x"];
 
 function generateSocialUrl(platform, username) {
   switch (platform) {
-    case "instagram":
-      return `https://instagram.com/${username}`;
-    case "tiktok":
-      return `https://tiktok.com/@${username}`;
-    case "x":
-      return `https://x.com/${username}`;
-    default:
-      throw new Error("Platform tidak dikenali");
+    case "instagram": return `https://instagram.com/${username}`;
+    case "tiktok": return `https://tiktok.com/@${username}`;
+    case "x": return `https://x.com/${username}`;
+    default: throw new Error("Platform tidak dikenali");
   }
 }
 
@@ -21,37 +17,26 @@ async function getUserSocials(userId) {
     .select("*")
     .eq("user_id", userId);
 
-  if (error) {
-    console.error("Supabase error:", error);
-    throw error;
-  }
-
+  if (error) throw error;
   return data;
 }
 
 async function addSocial(userId, platform, username) {
   const url = generateSocialUrl(platform, username);
-
   const { error } = await supabase
     .from("socials")
     .insert([{ user_id: userId, platform, username, url }]);
-
   if (error) throw error;
 }
 
 async function editSocial(userId, platform, oldUsername, newUsername) {
-  if (!allowedPlatforms.includes(platform)) {
-    throw new Error("Platform tidak valid");
-  }
-
   const newUrl = generateSocialUrl(platform, newUsername);
-
   const { error } = await supabase
     .from("socials")
     .update({ username: newUsername, url: newUrl })
     .eq("user_id", userId)
     .eq("platform", platform)
-    .eq("username", oldUsername); // ✅ tambahkan filter username
+    .eq("username", oldUsername);
 
   if (error) throw error;
 }
@@ -72,5 +57,5 @@ module.exports = {
   addSocial,
   editSocial,
   removeSocial,
-  allowedPlatforms,
+  allowedPlatforms
 };
