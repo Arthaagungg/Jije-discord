@@ -22,65 +22,82 @@ module.exports = new MessageCommand({
 
   /**
    * @param {DiscordBot} client
-   * @param {Message} message
+   * @param {import("discord.js").Message} message
    * @param {string[]} args
    */
   run: async (client, message, args) => {
-    const user = message.mentions.users.first() || message.author;
-    const isSelf = user.id === message.author.id;
+    try {
+      const user = message.mentions.users.first() || message.author;
+      const isSelf = user.id === message.author.id;
 
-    const socials = await getUserSocials(user.id);
+      let socials = [];
+      try {
+        socials = await getUserSocials(user.id);
+      } catch (err) {
+        console.error("Gagal mengambil sosial media:", err);
+      }
 
-    const iconMap = {
-      instagram: "📸",
-      tiktok: "🎵",
-      x: "🐦",
-    };
+      const iconMap = {
+        instagram: "📸",
+        tiktok: "🎵",
+        x: "🐦",
+      };
 
-    const formatted =
-      socials.length > 0
-        ? socials
-            .map((s) => {
-              const icon = iconMap[s.platform.toLowerCase()] || "🔗";
-              const username = s.url.split("/").pop(); // ambil `akunlu`
-              return `${icon} [${s.platform.toUpperCase()}](<${s.url}>) → \`@${username}\``;
-            })
-            .join("\n")
-        : "*Belum ada sosial media yang ditambahkan.*";
+      const formatted =
+        socials.length > 0
+          ? socials
+              .map((s) => {
+                const platform = String(s.platform || "").toLowerCase();
+                const icon = iconMap[platform] || "🔗";
 
-    const embed = new EmbedBuilder()
-      .setColor("#1DA1F2")
-      .setAuthor({
-        name: `${user.username}`,
-        iconURL: user.displayAvatarURL({ dynamic: true }),
-      })
-      .setTitle("🌐 Daftar Sosial Media")
-      .setDescription(formatted)
-      .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-      .setFooter({
-        text: isSelf
-          ? "Gunakan tombol di bawah untuk mengelola sosial media Anda."
-          : " ",
-        iconURL: isSelf ? client.user.displayAvatarURL() : null,
+                let username = "tidak diketahui";
+                if (typeof s.url === "string") {
+                  const parts = s.url.split("/");
+                  username = parts[parts.length - 1] || "tidak diketahui";
+                }
+
+                return `${icon} [${s.platform?.toUpperCase() || "?"}](<${s.url || "#" }>) → \`@${username}\``;
+              })
+              .join("\n")
+          : "*Belum ada sosial media yang ditambahkan.*";
+
+      const embed = new EmbedBuilder()
+        .setColor("#1DA1F2")
+        .setAuthor({
+          name: user.username,
+          iconURL: user.displayAvatarURL({ dynamic: true }),
+        })
+        .setTitle("🌐 Daftar Sosial Media")
+        .setDescription(formatted)
+        .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+        .setFooter({
+          text: isSelf
+            ? "Gunakan tombol di bawah untuk mengelola sosial media Anda."
+            : " ",
+          iconURL: isSelf ? client.user.displayAvatarURL() : undefined,
+        });
+
+      const components = [];
+
+      if (isSelf) {
+        components.push(
+          new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+              .setCustomId(`sosmed_manage_${user.id}`)
+              .setLabel("Kelola Sosial Media")
+              .setEmoji("🛠️")
+              .setStyle(ButtonStyle.Primary)
+          )
+        );
+      }
+
+      return message.reply({
+        embeds: [embed],
+        components,
       });
-
-    const components = [];
-
-    if (isSelf) {
-      components.push(
-        new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setCustomId(`sosmed_manage_${user.id}`) // 🔧 dinamis sesuai user id
-            .setLabel("Kelola Sosial Media")
-            .setEmoji("🛠️")
-            .setStyle(ButtonStyle.Primary)
-        )
-      );
+    } catch (err) {
+      console.error("Error saat menjalankan command sosmed:", err);
+      return message.reply("❌ Terjadi kesalahan saat memproses sosial media.");
     }
-    
-    return message.reply({
-      embeds: [embed],
-      components,
-    });
   },
 }).toJSON();
