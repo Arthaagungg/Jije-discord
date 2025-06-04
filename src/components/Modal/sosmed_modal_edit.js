@@ -1,10 +1,7 @@
-const { ModalSubmitInteraction } = require("discord.js");
-const DiscordBot = require("../../client/DiscordBot");
-const Component = require("../../structure/Component");
-const socialManager = require('../../utils/socials');
+const socialManager = require('../../utils/socials');Add commentMore actions
 
 module.exports = new Component({
-  customId: /^sosmed_modal_edit\d+$/, // support regex ID unik
+  customId: "sosmed_modal_edit",
   type: "modal",
 
   /**
@@ -12,35 +9,46 @@ module.exports = new Component({
    * @param {ModalSubmitInteraction} interaction
    */
   run: async (client, interaction) => {
-    const userId = interaction.user.id;
-    const socials = await socialManager.getUserSocials(userId);
+    const socials = await socialManager.getUserSocials(interaction.user.id);
 
-    let updatedCount = 0;
 
-    for (const social of socials) {
-      const fieldId = `edit_${social.id}`;
-
-      // 💡 Pastikan field ini ada di modal yang dikirim user
-      if (interaction.fields.fields.has(fieldId)) {
-        const newValue = interaction.fields.getTextInputValue(fieldId).trim();
-
-        if (newValue && newValue !== social.username) {
-          await socialManager.updateUserSocial(userId, social.id, newValue);
-          updatedCount++;
-        }
-      }
-    }
-
-    if (updatedCount === 0) {
+    if (!socials || socials.length === 0) {
       return interaction.reply({
-        content: "⚠️ Tidak ada perubahan yang disimpan.",
+        content: "❌ Tidak ada sosial media yang bisa diedit.",
         ephemeral: true,
       });
     }
 
+    let updated = 0;
+
+    for (let i = 0; i < socials.length; i++) {
+      const social = socials[i];
+      const fieldId = `edit_${social.id}`;
+      const newUsername = interaction.fields.getTextInputValue(fieldId)?.trim();
+
+      if (newUsername && newUsername !== social.username) {
+        await socialManager.editSocialById(social.id, social.platform, newUsername);
+        updated++;
+
+
+
+
+
+      }
+    }
+
+
+
+
+
+
+
+
     return interaction.reply({
-      content: `✅ ${updatedCount} sosial media berhasil diperbarui.`,
+      content: updated > 0
+        ? `✅ Berhasil mengedit ${updated} sosial media!`
+        : "⚠️ Tidak ada perubahan yang dilakukan.",
       ephemeral: true,
     });
-  },
-});
+  }
+}).toJSON();
