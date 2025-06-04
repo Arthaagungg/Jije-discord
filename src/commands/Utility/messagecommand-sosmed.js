@@ -77,7 +77,6 @@ module.exports = new MessageCommand({
         )
       );
     }
-console.log(`sosmed_manage_${user.id}`); // <-- Ini
     return message.reply({
       embeds: [embed],
       components,
