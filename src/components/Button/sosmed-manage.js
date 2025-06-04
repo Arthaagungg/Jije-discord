@@ -12,7 +12,7 @@ const Component = require("../../structure/Component");
 
 module.exports = new Component({
   // Kita pakai wildcard handler
-  customId: "sosmed_manage_", 
+  customId: /^sosmed_manage_\d+$/,
   type: "button",
 
   /**
