@@ -1,4 +1,4 @@
-const socialManager = require('../../utils/socials');Add commentMore actions
+const socialManager = require('../../utils/socials');
 
 module.exports = new Component({
   customId: "sosmed_modal_edit",
@@ -11,7 +11,7 @@ module.exports = new Component({
   run: async (client, interaction) => {
     const socials = await socialManager.getUserSocials(interaction.user.id);
 
-
+    // Cek apakah pengguna memiliki data sosial media
     if (!socials || socials.length === 0) {
       return interaction.reply({
         content: "❌ Tidak ada sosial media yang bisa diedit.",
@@ -29,20 +29,8 @@ module.exports = new Component({
       if (newUsername && newUsername !== social.username) {
         await socialManager.editSocialById(social.id, social.platform, newUsername);
         updated++;
-
-
-
-
-
       }
     }
-
-
-
-
-
-
-
 
     return interaction.reply({
       content: updated > 0
