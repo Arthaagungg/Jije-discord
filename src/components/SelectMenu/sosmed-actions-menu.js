@@ -7,20 +7,19 @@ const {
 } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
-const socialManager = require('../../utils/socials');
+const socialManager = require("../../utils/socials");
 
 module.exports = new Component({
-  customId: 'sosmed_action_menu', // support dynamic user ID
+  customId: "sosmed_action_menu",
   type: "select",
 
   /**
-   * 
-   * @param {DiscordBot} client 
-   * @param {StringSelectMenuInteraction} interaction 
+   * @param {DiscordBot} client
+   * @param {StringSelectMenuInteraction} interaction
    */
   run: async (client, interaction) => {
-  const selected = interaction.values[0];
-  const userId = interaction.user.id; // ✅ fix error
+    const selected = interaction.values[0];
+    const userId = interaction.user.id;
 
     if (selected === "add") {
       const modal = new ModalBuilder()
@@ -46,24 +45,23 @@ module.exports = new Component({
         );
 
       await interaction.showModal(modal);
-
     }
 
     else if (selected === "edit") {
-      // Ambil data sosial media user
-      const userSocials = socialManager.getUserSocials(userId);
-        if (userSocials.length === 0) {
-            return interaction.reply({
-                content: '❌ Kamu belum punya sosial media untuk dikelola.',
-                ephemeral: true
-            });
-        }
+      const socials = await socialManager.getUserSocials(userId);
+
+      if (!socials || socials.length === 0) {
+        return interaction.reply({
+          content: "❌ Kamu belum punya sosial media untuk diedit.",
+          ephemeral: true
+        });
+      }
 
       const modal = new ModalBuilder()
         .setCustomId("sosmed_modal_edit")
         .setTitle("Edit Sosial Media");
 
-      const components = socials.slice(0, 5).map((social, idx) => (
+      const components = socials.slice(0, 5).map((social, idx) =>
         new ActionRowBuilder().addComponents(
           new TextInputBuilder()
             .setCustomId(`edit_${social.platform}_${idx}`)
@@ -71,7 +69,7 @@ module.exports = new Component({
             .setStyle(TextInputStyle.Short)
             .setRequired(false)
         )
-      ));
+      );
 
       modal.addComponents(...components);
 
@@ -79,8 +77,6 @@ module.exports = new Component({
     }
 
     else if (selected === "delete") {
-      // Handler delete bisa dibuat pakai modal atau select menu lanjutan
-      // Untuk sementara tampilkan alert
       return interaction.reply({
         content: "❌ Fitur hapus sosial media sedang dalam pengembangan.",
         ephemeral: true
