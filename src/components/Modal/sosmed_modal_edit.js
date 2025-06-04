@@ -17,32 +17,28 @@ module.exports = new Component({
     if (!socials || socials.length === 0) {
       return interaction.reply({
         content: "❌ Tidak ada sosial media yang bisa diedit.",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
     let updated = 0;
 
-    for (let social of socials) {
+    for (let i = 0; i < socials.length; i++) {
+      const social = socials[i];
       const fieldId = `edit_${social.id}`;
       const newUsername = interaction.fields.getTextInputValue(fieldId)?.trim();
 
       if (newUsername && newUsername !== social.username) {
-        await socialManager.editSocial(interaction.user.id, social.platform, newUsername);
+        await socialManager.editSocialById(social.id, social.platform, newUsername);
         updated++;
       }
     }
 
-    if (updated === 0) {
-      return interaction.reply({
-        content: "⚠️ Tidak ada perubahan yang dilakukan.",
-        ephemeral: true
-      });
-    }
-
     return interaction.reply({
-      content: `✅ Berhasil mengedit ${updated} sosial media!`,
-      ephemeral: true
+      content: updated > 0
+        ? `✅ Berhasil mengedit ${updated} sosial media!`
+        : "⚠️ Tidak ada perubahan yang dilakukan.",
+      ephemeral: true,
     });
   }
 }).toJSON();
