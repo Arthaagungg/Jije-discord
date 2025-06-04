@@ -12,7 +12,7 @@ const Component = require("../../structure/Component");
 
 module.exports = new Component({
   // Kita pakai wildcard handler
-  customId: /^sosmed_manage_\d+$/, // cocokkan dengan customId seperti "sosmed_manage_1234567890"
+  customId: /^sosmed_manage_\d+$/i, // cocokkan dengan customId seperti "sosmed_manage_1234567890"
   type: "button",
 
   /**
@@ -20,6 +20,7 @@ module.exports = new Component({
    * @param {ButtonInteraction} interaction 
    */
   run: async (client, interaction) => {
+    console.log("[DEBUG] CustomID Received:", interaction.customId); // <-- Ini!
     await interaction.deferUpdate();
 
     const userId = interaction.user.id;
