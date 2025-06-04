@@ -27,14 +27,14 @@ module.exports = new Component({
     const targetId = interaction.customId.replace("sosmed_manage_", "");
     console.log("[DEBUG] CustomID Received:", targetId);
     if (userId !== targetId) {
-      return interaction.followUp({
+      return interaction.editReply({
         content: "❌ Ini bukan menu milik kamu.",
         ephemeral: true
       });
     }
 
     const selectMenu = new StringSelectMenuBuilder()
-      .setCustomId(`sosmed_action_menu`)
+      .setCustomId(`sosmed_action_menu${interaction.user.id}`)
       .setPlaceholder("Pilih aksi sosial media")
       .addOptions(
         new StringSelectMenuOptionBuilder()
