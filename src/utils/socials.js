@@ -39,7 +39,7 @@ async function editSocialById(id, platform, newUsername) {
   if (error) throw error;
 }
 
-async function removeSocialById(id) {
+async function deleteSocialById(id) {
   const { error } = await supabase
     .from("socials")
     .delete()
