@@ -20,12 +20,18 @@ class ComponentsListener {
                 }
 
                 return true;
-            }
+            };
 
             try {
-                // Handle Button
+                // Handle Button (✨ Sudah support Regex)
                 if (interaction.isButton()) {
-                    const component = client.collection.components.buttons.get(interaction.customId);
+                    const components = [...client.collection.components.buttons.values()];
+                    const component = components.find(c => {
+                        if (typeof c.customId === 'string') return c.customId === interaction.customId;
+                        if (c.customId instanceof RegExp) return c.customId.test(interaction.customId);
+                        return false;
+                    });
+
                     if (!component) return;
 
                     if (!(await checkUserPermissions(component))) return;
@@ -39,9 +45,15 @@ class ComponentsListener {
                     return;
                 }
 
-                // Handle Select Menu
+                // Handle Select Menu (✨ Sudah support Regex)
                 if (interaction.isAnySelectMenu()) {
-                    const component = client.collection.components.selects.get(interaction.customId);
+                    const components = [...client.collection.components.selects.values()];
+                    const component = components.find(c => {
+                        if (typeof c.customId === 'string') return c.customId === interaction.customId;
+                        if (c.customId instanceof RegExp) return c.customId.test(interaction.customId);
+                        return false;
+                    });
+
                     if (!component) return;
 
                     if (!(await checkUserPermissions(component))) return;
@@ -55,7 +67,7 @@ class ComponentsListener {
                     return;
                 }
 
-                // Handle Modal Submit (✨ Perbaikan: support Regex match)
+                // Handle Modal Submit (✨ Sudah support Regex)
                 if (interaction.isModalSubmit()) {
                     const components = [...client.collection.components.modals.values()];
                     const component = components.find(c => {
@@ -88,6 +100,7 @@ class ComponentsListener {
 
                     return;
                 }
+
             } catch (err) {
                 error(err);
             }
