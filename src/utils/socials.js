@@ -29,7 +29,6 @@ async function getUserSocials(userId) {
         throw error;
     }
 
-    console.log("Data socials:", data);
     return data;
 }
 
