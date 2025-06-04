@@ -12,7 +12,7 @@ const Component = require("../../structure/Component");
 
 module.exports = new Component({
   // Kita pakai wildcard handler
-  customId: /^sosmed_manage_\d+$/i, // cocokkan dengan customId seperti "sosmed_manage_1234567890"
+  customId: customId: "sosmed_manage_", 
   type: "button",
 
   /**
@@ -24,8 +24,8 @@ module.exports = new Component({
     await interaction.deferUpdate();
 
     const userId = interaction.user.id;
-    const targetId = interaction.customId.split("_").pop();
-
+    const targetId = interaction.customId.replace("sosmed_manage_", "");
+    
     if (userId !== targetId) {
       return interaction.followUp({
         content: "❌ Ini bukan menu milik kamu.",
