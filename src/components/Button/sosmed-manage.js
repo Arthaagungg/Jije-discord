@@ -20,12 +20,12 @@ module.exports = new Component({
    * @param {ButtonInteraction} interaction 
    */
   run: async (client, interaction) => {
-    console.log("[DEBUG] CustomID Received:", interaction.customId); // <-- Ini!
+    
     await interaction.deferUpdate();
 
     const userId = interaction.user.id;
     const targetId = interaction.customId.replace("sosmed_manage_", "");
-    
+    console.log("[DEBUG] CustomID Received:", targetId);
     if (userId !== targetId) {
       return interaction.followUp({
         content: "❌ Ini bukan menu milik kamu.",
