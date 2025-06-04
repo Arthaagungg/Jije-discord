@@ -11,11 +11,11 @@ const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
 
 module.exports = new Component({
-  customId: "sosmed_manage",
+  // Kita pakai wildcard handler
+  customId: /^sosmed_manage_\d+$/, // cocokkan dengan customId seperti "sosmed_manage_1234567890"
   type: "button",
 
   /**
-   * 
    * @param {DiscordBot} client 
    * @param {ButtonInteraction} interaction 
    */
@@ -23,6 +23,14 @@ module.exports = new Component({
     await interaction.deferUpdate();
 
     const userId = interaction.user.id;
+    const targetId = interaction.customId.split("_").pop();
+
+    if (userId !== targetId) {
+      return interaction.followUp({
+        content: "❌ Ini bukan menu milik kamu.",
+        ephemeral: true
+      });
+    }
 
     const selectMenu = new StringSelectMenuBuilder()
       .setCustomId(`sosmed_action_menu`)
@@ -45,7 +53,7 @@ module.exports = new Component({
     const row1 = new ActionRowBuilder().addComponents(selectMenu);
 
     const disabledButton = new ButtonBuilder()
-      .setCustomId("sosmed_manage")
+      .setCustomId(`sosmed_manage_${userId}`)
       .setLabel("Kelola Sosial Media")
       .setStyle(ButtonStyle.Primary)
       .setDisabled(true);
@@ -57,7 +65,7 @@ module.exports = new Component({
       components: [row1, row2],
     });
 
-    // 💡 Tambahkan collector
+    // 💡 Collector: biarkan handler modal/select lain yang proses pilihan
     const collector = reply.createMessageComponentCollector({
       componentType: ComponentType.StringSelect,
       time: 2 * 60 * 1000, // 2 menit
@@ -71,11 +79,10 @@ module.exports = new Component({
         });
       }
 
-      // Biarkan handler khusus (sosmed_action_menu.js) yang tangani
+      // Handler khusus akan menangani interaction ini
     });
 
     collector.on("end", async () => {
-      // Disable menu setelah waktu habis
       selectMenu.setDisabled(true);
       await reply.edit({
         components: [
