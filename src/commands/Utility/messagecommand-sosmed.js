@@ -3,6 +3,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  Message,
 } = require("discord.js");
 const { getUserSocials } = require("../../utils/socials");
 
@@ -21,10 +22,10 @@ module.exports = new MessageCommand({
   },
 
   /**
-   * @param {DiscordBot} client
-   * @param {import("discord.js").Message} message
-   * @param {string[]} args
-   */
+     * @param {DiscordBot} client 
+     * @param {Message} message 
+     * @param {string[]} args
+     */
   run: async (client, message, args) => {
     try {
       const user = message.mentions.users.first() || message.author;
