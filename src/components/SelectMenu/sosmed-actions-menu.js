@@ -86,13 +86,34 @@ module.exports = new Component({
       return interaction.showModal(modal);
     }
 
-    // 🛠️ Handler: Delete Sosmed (belum tersedia)
-    else if (selected === "delete") {
-      return interaction.reply({
-        content: "❌ Fitur hapus sosial media sedang dalam pengembangan.",
-        ephemeral: true
-      });
-    }
+else if (selected === "delete") {
+  const socials = await socialManager.getUserSocials(userId);
+
+  if (!socials || socials.length === 0) {
+    return interaction.reply({
+      content: "❌ Kamu belum punya sosial media untuk dihapus.",
+      ephemeral: true
+    });
+  }
+
+  const selectRow = new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder()
+      .setCustomId(`sosmed_delete_select_${userId}`)
+      .setPlaceholder("Pilih sosial media yang ingin dihapus")
+      .addOptions(
+        socials.map(s => ({
+          label: `${s.platform} (${s.username})`,
+          value: String(s.id),
+        }))
+      )
+  );
+
+  return interaction.reply({
+    content: "🗑️ Pilih sosial media yang ingin kamu hapus:",
+    components: [selectRow],
+    ephemeral: true
+  });
+}
 
     // ❗Jika value tak dikenal
     else {
