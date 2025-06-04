@@ -71,14 +71,15 @@ module.exports = new Component({
         .setTitle("Edit Sosial Media");
 
       const components = socials.slice(0, 5).map((social) =>
-        new ActionRowBuilder().addComponents(
-          new TextInputBuilder()
-            .setCustomId(`edit_${social.id}`)
-            .setLabel(`${social.platform} (sekarang: ${social.username})`)
-            .setStyle(TextInputStyle.Short)
-            .setRequired(false)
-        )
-      );
+  new ActionRowBuilder().addComponents(
+    new TextInputBuilder()
+      .setCustomId(`edit_${social.id}`)
+      .setLabel(`Platform: ${social.platform}`)
+      .setStyle(TextInputStyle.Short)
+      .setPlaceholder(social.username) 
+      .setRequired(false)
+  )
+);
 
       modal.addComponents(...components);
 
