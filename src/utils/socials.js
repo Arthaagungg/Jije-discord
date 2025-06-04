@@ -29,25 +29,21 @@ async function addSocial(userId, platform, username) {
   if (error) throw error;
 }
 
-async function editSocial(userId, platform, oldUsername, newUsername) {
+async function editSocialById(id, platform, newUsername) {
   const newUrl = generateSocialUrl(platform, newUsername);
   const { error } = await supabase
     .from("socials")
     .update({ username: newUsername, url: newUrl })
-    .eq("user_id", userId)
-    .eq("platform", platform)
-    .eq("username", oldUsername);
+    .eq("id", id);
 
   if (error) throw error;
 }
 
-async function removeSocial(userId, platform, username) {
+async function removeSocialById(id) {
   const { error } = await supabase
     .from("socials")
     .delete()
-    .eq("user_id", userId)
-    .eq("platform", platform)
-    .eq("username", username);
+    .eq("id", id);
 
   if (error) throw error;
 }
@@ -55,7 +51,8 @@ async function removeSocial(userId, platform, username) {
 module.exports = {
   getUserSocials,
   addSocial,
-  editSocial,
-  removeSocial,
-  allowedPlatforms
+  editSocialById,
+  removeSocialById,
+  allowedPlatforms,
+  generateSocialUrl,
 };
