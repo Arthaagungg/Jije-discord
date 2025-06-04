@@ -3,7 +3,7 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  ActionRowBuilder
+  ActionRowBuilder,
 } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
@@ -29,9 +29,8 @@ module.exports = new Component({
           new ActionRowBuilder().addComponents(
             new TextInputBuilder()
               .setCustomId("platform")
-              .setLabel("Nama Sosial Media (tiktok, instagram, x)")
+              .setLabel("Platform (tiktok, instagram, x)")
               .setStyle(TextInputStyle.Short)
-              .setPlaceholder("tiktok")
               .setRequired(true)
           ),
           new ActionRowBuilder().addComponents(
@@ -39,18 +38,19 @@ module.exports = new Component({
               .setCustomId("username")
               .setLabel("Username")
               .setStyle(TextInputStyle.Short)
-              .setPlaceholder("Hanya username, tanpa link")
               .setRequired(true)
           )
         );
 
       await interaction.showModal(modal);
+    }
 
-    } else if (selected === "edit") {
-      const userSocials = await socialManager.getUserSocials(userId);
-      if (!userSocials || userSocials.length === 0) {
+    else if (selected === "edit") {
+      const socials = await socialManager.getUserSocials(userId);
+
+      if (socials.length === 0) {
         return interaction.reply({
-          content: '❌ Kamu belum punya sosial media untuk dikelola.',
+          content: '❌ Kamu belum punya sosial media untuk diedit.',
           ephemeral: true
         });
       }
@@ -59,7 +59,7 @@ module.exports = new Component({
         .setCustomId("sosmed_modal_edit")
         .setTitle("Edit Sosial Media");
 
-      const components = userSocials.slice(0, 5).map((social) => (
+      const components = socials.slice(0, 5).map((social) =>
         new ActionRowBuilder().addComponents(
           new TextInputBuilder()
             .setCustomId(`edit_${social.id}`)
@@ -67,11 +67,14 @@ module.exports = new Component({
             .setStyle(TextInputStyle.Short)
             .setRequired(false)
         )
-      ));
+      );
 
       modal.addComponents(...components);
+
       await interaction.showModal(modal);
-    } else if (selected === "delete") {
+    }
+
+    else if (selected === "delete") {
       return interaction.reply({
         content: "❌ Fitur hapus sosial media sedang dalam pengembangan.",
         ephemeral: true
