@@ -1,7 +1,7 @@
 const { ModalSubmitInteraction } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const Component = require("../../structure/Component");
-const socialManager = require("../../utils/socials");
+const socialManager = require('../../utils/socials');
 
 module.exports = new Component({
   customId: "sosmed_modal_edit",
@@ -17,23 +17,19 @@ module.exports = new Component({
     if (!socials || socials.length === 0) {
       return interaction.reply({
         content: "❌ Tidak ada sosial media yang bisa diedit.",
-        ephemeral: true,
+        ephemeral: true
       });
     }
 
     let updated = 0;
 
     for (let i = 0; i < socials.length; i++) {
-      const fieldId = `edit_${socials[i].platform}_${i}`;
+      const social = socials[i];
+      const fieldId = `edit_${social.platform}_${social.username}`;
       const newUsername = interaction.fields.getTextInputValue(fieldId)?.trim();
 
-      if (newUsername && newUsername !== socials[i].username) {
-        await socialManager.editSocial(
-          interaction.user.id,
-          socials[i].platform,
-          socials[i].username, // username lama untuk filter
-          newUsername
-        );
+      if (newUsername && newUsername !== social.username) {
+        await socialManager.editSocial(interaction.user.id, social.platform, social.username, newUsername);
         updated++;
       }
     }
@@ -41,13 +37,13 @@ module.exports = new Component({
     if (updated === 0) {
       return interaction.reply({
         content: "⚠️ Tidak ada perubahan yang dilakukan.",
-        ephemeral: true,
+        ephemeral: true
       });
     }
 
     return interaction.reply({
       content: `✅ Berhasil mengedit ${updated} sosial media!`,
-      ephemeral: true,
+      ephemeral: true
     });
-  },
+  }
 }).toJSON();
