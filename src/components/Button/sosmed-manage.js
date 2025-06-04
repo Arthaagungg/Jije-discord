@@ -25,7 +25,7 @@ module.exports = new Component({
 
     const userId = interaction.user.id;
     const targetId = interaction.customId.replace("sosmed_manage_", "");
-    console.log("[DEBUG] CustomID Received:", targetId);
+    
     if (userId !== targetId) {
       return interaction.editReply({
         content: "❌ Ini bukan menu milik kamu.",
