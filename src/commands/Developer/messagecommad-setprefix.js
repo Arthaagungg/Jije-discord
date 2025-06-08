@@ -1,49 +1,96 @@
-const { Message } = require("discord.js");
+const { Message, EmbedBuilder } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const MessageCommand = require("../../structure/MessageCommand");
-const config = require("../../config");
+const supabase = require("../../utils/supabase");
 
 module.exports = new MessageCommand({
     command: {
         name: 'setprefix',
-        description: 'Set prefix for this guild.',
+        description: 'Atur prefix untuk server ini.',
         aliases: []
     },
     options: {
         cooldown: 5000,
-         botDevelopers: true
-     },
+        botDevelopers: true
+    },
+
     /**
      * 
      * @param {DiscordBot} client 
      * @param {Message} message 
-     * @param {string[]} args
+     * @param {string[]} args 
      */
     run: async (client, message, args) => {
-        if (!args[0]) {
-            await message.reply({
-                content: 'You must provide the prefix!'
-            });
+        const prefixBaru = args[0];
 
-            return;
+        if (!prefixBaru) {
+            const embed = new EmbedBuilder()
+                .setColor('Red')
+                .setTitle('❌ Prefix tidak diberikan')
+                .setDescription('Kamu harus menyertakan prefix yang ingin digunakan.')
+                .setFooter({ text: 'Pengaturan Prefix', iconURL: message.guild.iconURL({ dynamic: true }) });
+
+            return message.reply({ embeds: [embed] });
         }
 
-        if (args[0].length > 5) {
-            await message.reply({
-                content: 'The prefix is too long! (' + args[0].length + ' > 5)'
-            });
+        if (prefixBaru.length > 5) {
+            const embed = new EmbedBuilder()
+                .setColor('Red')
+                .setTitle('⚠️ Prefix terlalu panjang')
+                .setDescription(`Panjang prefix maksimal adalah 5 karakter. Yang kamu masukkan: **${prefixBaru.length} karakter**.`)
+                .setFooter({ text: 'Pengaturan Prefix', iconURL: message.guild.iconURL({ dynamic: true }) });
 
-            return;
+            return message.reply({ embeds: [embed] });
         }
 
-        if (args[0] === config.commands.prefix) {
-            client.database.delete('prefix-' + message.guild.id);
+        // Cek apakah sudah ada prefix sebelumnya
+        const { data: existing, error } = await supabase
+            .from("prefixes")
+            .select("*")
+            .eq("guild_id", message.guild.id)
+            .single();
+
+        let embed;
+        if (existing) {
+            // Update prefix
+            const { error: updateError } = await supabase
+                .from("prefixes")
+                .update({ prefix: prefixBaru })
+                .eq("guild_id", message.guild.id);
+
+            if (updateError) {
+                console.error(updateError);
+                embed = new EmbedBuilder()
+                    .setColor('Red')
+                    .setTitle('❌ Gagal memperbarui prefix')
+                    .setDescription('Terjadi kesalahan saat memperbarui prefix di database.');
+            } else {
+                embed = new EmbedBuilder()
+                    .setColor('Green')
+                    .setTitle('✅ Prefix Diperbarui')
+                    .setDescription(`Prefix berhasil diubah menjadi \`${prefixBaru}\`.`);
+            }
         } else {
-            client.database.set('prefix-' + message.guild.id, args[0].toLowerCase());
+            // Insert prefix
+            const { error: insertError } = await supabase
+                .from("prefixes")
+                .insert([{ guild_id: message.guild.id, prefix: prefixBaru }]);
+
+            if (insertError) {
+                console.error(insertError);
+                embed = new EmbedBuilder()
+                    .setColor('Red')
+                    .setTitle('❌ Gagal menyimpan prefix')
+                    .setDescription('Terjadi kesalahan saat menyimpan prefix di database.');
+            } else {
+                embed = new EmbedBuilder()
+                    .setColor('Green')
+                    .setTitle('✅ Prefix Disimpan')
+                    .setDescription(`Prefix berhasil disetel ke \`${prefixBaru}\`.`);
+            }
         }
 
-        await message.reply({
-            content: 'Successfully updated the prefix to \`' + args[0] + '\`.'
-        });
+        embed.setFooter({ text: 'Pengaturan Prefix', iconURL: message.guild.iconURL({ dynamic: true }) });
+        await message.reply({ embeds: [embed] });
     }
 }).toJSON();
