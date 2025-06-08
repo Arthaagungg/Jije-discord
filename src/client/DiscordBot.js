@@ -6,7 +6,8 @@ const CommandsListener = require("./handler/CommandsListener");
 const ComponentsHandler = require("./handler/ComponentsHandler");
 const ComponentsListener = require("./handler/ComponentsListener");
 const EventsHandler = require("./handler/EventsHandler");
-const { QuickYAML } = require('quick-yaml.db');
+const { QuickYAML } = require("quick-yaml.db");
+const supabase = require("../utils/supabase");
 
 class DiscordBot extends Client {
     collection = {
@@ -19,7 +20,8 @@ class DiscordBot extends Client {
             modals: new Collection(),
             autocomplete: new Collection()
         }
-    }
+    };
+
     rest_application_commands_array = [];
     login_attempts = 0;
     login_timestamp = 0;
@@ -52,9 +54,18 @@ class DiscordBot extends Client {
                 }]
             }
         });
-        
+
         new CommandsListener(this);
         new ComponentsListener(this);
+    }
+
+    async checkDevelopers() {
+        const { data, error } = await supabase.from('developers').select('*');
+        if (error) {
+            console.error('❌ Supabase error saat cek developers:', error);
+            return false;
+        }
+        return data.length > 0;
     }
 
     startStatusRotation = () => {
@@ -63,30 +74,38 @@ class DiscordBot extends Client {
             this.user.setPresence({ activities: [this.statusMessages[index]] });
             index = (index + 1) % this.statusMessages.length;
         }, 4000);
-    }
+    };
 
     connect = async () => {
-        warn(`Attempting to connect to the Discord bot... (${this.login_attempts + 1})`);
+        warn(`🔌 Mencoba menyambung ke bot Discord... (percobaan ${this.login_attempts + 1})`);
 
         this.login_timestamp = Date.now();
 
         try {
             await this.login(process.env.CLIENT_TOKEN);
+
+            const hasDevelopers = await this.checkDevelopers();
+            if (!hasDevelopers) {
+                warn('🚫 Tidak ada developer terdaftar. Memuat perintah terbatas khusus owner...');
+                this.commands_handler.loadMinimal(); // hanya !adddeveloper
+                return;
+            }
+
             this.commands_handler.load();
             this.components_handler.load();
             this.events_handler.load();
             this.startStatusRotation();
 
-            warn('Attempting to register application commands... (this might take a while!)');
+            warn('📦 Registering application commands...');
             await this.commands_handler.registerApplicationCommands(config.development);
-            success('Successfully registered application commands. For specific guild? ' + (config.development.enabled ? 'Yes' : 'No'));
+            success('✅ Application commands berhasil diregistrasi. Mode guild? ' + (config.development.enabled ? 'Ya' : 'Tidak'));
         } catch (err) {
-            error('Failed to connect to the Discord bot, retrying...');
+            error('❌ Gagal menyambung ke bot Discord. Mencoba ulang...');
             error(err);
             this.login_attempts++;
             setTimeout(this.connect, 5000);
         }
-    }
+    };
 }
 
 module.exports = DiscordBot;
