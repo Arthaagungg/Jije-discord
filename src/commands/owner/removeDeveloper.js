@@ -1,64 +1,82 @@
-const { Message, EmbedBuilder } = require("discord.js");
-const DiscordBot = require("../../client/DiscordBot");
-const MessageCommand = require("../../structure/MessageCommand");
-const config = require("../../config");
-const supabase = require("../../utils/supabase");
+const { EmbedBuilder, Message } = require("discord.js");
+const DiscordBot = require("../../../client/DiscordBot");
+const MessageCommand = require("../../../structure/MessageCommand");
+const supabase = require("../../../modules/supabase");
 
 module.exports = new MessageCommand({
-    command: {
-        name: "removedeveloper",
-        description: "Menghapus developer dari database Supabase.",
-        aliases: []
-    },
+  command: {
+    name: "removedeveloper",
+    description: "Menghapus developer dari database.",
+    aliases: [],
+  },
+  options: {
+    owner: true,
+  },
 
-    /**
-     * 
-     * @param {DiscordBot} client 
-     * @param {Message} message 
-     * @param {string[]} args 
-     */
-    run: async (client, message, args) => {
-        const embed = new EmbedBuilder().setColor("Red");
+  /**
+   * @param {DiscordBot} client 
+   * @param {Message} message 
+   * @param {string[]} args 
+   */
+  run: async (client, message, args) => {
+    const target = message.mentions.users.first() || client.users.cache.get(args[0]);
 
-        if (message.author.id !== config.users.ownerId) {
-            embed.setDescription("❌ Kamu bukan owner bot.");
-            return message.reply({ embeds: [embed] });
-        }
-
-        const mention = message.mentions.users.first();
-        if (!mention) {
-            embed.setDescription("❗ Mention user yang ingin dihapus dari developer.");
-            return message.reply({ embeds: [embed] });
-        }
-
-        const guildId = message.guild?.id;
-        if (!guildId) {
-            embed.setDescription("❗ Gagal mendeteksi guild ID.");
-            return message.reply({ embeds: [embed] });
-        }
-
-        const { data, error: deleteError } = await supabase
-            .from("developers")
-            .delete()
-            .eq("user_id", mention.id)
-            .eq("guild_id", guildId);
-
-        if (deleteError) {
-            console.error(deleteError);
-            embed.setDescription("❌ Gagal menghapus developer dari database.");
-            return message.reply({ embeds: [embed] });
-        }
-
-        if (!data || data.length === 0) {
-            embed.setDescription("⚠️ User tersebut tidak terdaftar sebagai developer di server ini.");
-            return message.reply({ embeds: [embed] });
-        }
-
-        const successEmbed = new EmbedBuilder()
-            .setColor("Green")
-            .setTitle("✅ Developer Dihapus")
-            .setDescription(`<@${mention.id}> berhasil dihapus dari daftar developer.`);
-
-        await message.reply({ embeds: [successEmbed] });
+    if (!target) {
+      return message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor("Red")
+            .setTitle("❌ Pengguna tidak ditemukan")
+            .setDescription("Kamu harus mention user atau masukkan ID mereka.")
+        ]
+      });
     }
-});
+
+    // Cek apakah user adalah developer di server ini
+    const { data: existing, error: selectError } = await supabase
+      .from("developers")
+      .select("*")
+      .eq("user_id", target.id)
+      .eq("guild_id", message.guild.id)
+      .single();
+
+    if (!existing) {
+      return message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor("Yellow")
+            .setTitle("⚠️ User tidak ditemukan di database")
+            .setDescription("User tersebut tidak terdaftar sebagai developer di server ini.")
+        ]
+      });
+    }
+
+    // Hapus data
+    const { error: deleteError } = await supabase
+      .from("developers")
+      .delete()
+      .eq("user_id", target.id)
+      .eq("guild_id", message.guild.id);
+
+    if (deleteError) {
+      return message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor("Red")
+            .setTitle("❌ Gagal menghapus developer")
+            .setDescription("Terjadi kesalahan saat menghapus data dari database.")
+        ]
+      });
+    }
+
+    // Berhasil
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setColor("Green")
+          .setTitle("✅ Developer berhasil dihapus")
+          .setDescription(`User <@${target.id}> berhasil dihapus dari daftar developer.`)
+      ]
+    });
+  }
+}).toJSON();
