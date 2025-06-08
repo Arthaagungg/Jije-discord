@@ -1,16 +1,6 @@
-const { Message, PermissionsBitField, ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const MessageCommand = require("../../structure/MessageCommand"); 
-const DiscordBot = require("../../client/DiscordBot");
+const { Message, PermissionsBitField, ChannelType, EmbedBuilder } = require("discord.js"); const MessageCommand = require("../../structure/MessageCommand"); const DiscordBot = require("../../client/DiscordBot");
 
-module.exports = new MessageCommand({ 
-command: { 
-name: 'setup', 
-description: 'Setup awal bot saat pertama kali masuk ke server.', 
-aliases: [] }, 
-options: { 
-cooldown: 5000,
-botOwner: true
-},
+module.exports = new MessageCommand({ command: { name: 'setup', description: 'Setup awal bot saat pertama kali masuk ke server.', aliases: [] }, options: { cooldown: 5000, botOwner: true },
 
 /**
 
@@ -18,7 +8,7 @@ botOwner: true
 
 @param {Message} message
 
-@param {string[]} args */ run: async (client, message, args) => { // Cek apakah user punya permission administrator if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) { return message.reply('❌ Kamu harus memiliki permission Administrator untuk menjalankan setup.'); }
+@param {string[]} args */ run: async (client, message, args) => { if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) { return message.reply('❌ Kamu harus memiliki permission Administrator untuk menjalankan setup.'); }
 
 
 const setupMessage = await message.reply('🔧 Memulai setup awal bot. Mohon tunggu sebentar...');
@@ -60,7 +50,11 @@ try {
       },
       {
         id: botMember.id,
-        allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks]
+        allow: [
+          PermissionsBitField.Flags.ViewChannel,
+          PermissionsBitField.Flags.SendMessages,
+          PermissionsBitField.Flags.EmbedLinks
+        ]
       }
     ]
   });
@@ -75,6 +69,14 @@ try {
 
   const sent = await channel.send({ embeds: [embed] });
   await sent.pin();
+
+  // 4. Simpan ID channel ke Supabase
+  await client.supabase
+    .from('settings')
+    .upsert({
+      guild_id: message.guild.id,
+      maintenance_channel_id: channel.id
+    });
 
   await setupMessage.edit('✅ Setup awal bot berhasil diselesaikan. Selamat menggunakan bot!');
 
