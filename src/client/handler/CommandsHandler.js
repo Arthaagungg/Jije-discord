@@ -9,8 +9,7 @@ class CommandsHandler {
     client;
 
     /**
-     *
-     * @param {DiscordBot} client 
+     * @param {DiscordBot} client
      */
     constructor(client) {
         this.client = client;
@@ -18,50 +17,46 @@ class CommandsHandler {
 
     load = () => {
         for (const directory of readdirSync('./src/commands/')) {
-            for (const file of readdirSync('./src/commands/' + directory).filter((f) => f.endsWith('.js'))) {
+            for (const file of readdirSync('./src/commands/' + directory).filter(f => f.endsWith('.js'))) {
                 try {
-                    /**
-                     * @type {ApplicationCommand['data'] | MessageCommand['data']}
-                     */
                     const module = require('../../commands/' + directory + '/' + file);
-
                     if (!module) continue;
 
                     if (module.__type__ === 2) {
                         if (!module.command || !module.run) {
-                            error('Unable to load the message command ' + file);
+                            error('Gagal memuat message command: ' + file);
                             continue;
                         }
 
                         this.client.collection.message_commands.set(module.command.name, module);
 
                         if (module.command.aliases && Array.isArray(module.command.aliases)) {
-                            module.command.aliases.forEach((alias) => {
+                            module.command.aliases.forEach(alias => {
                                 this.client.collection.message_commands_aliases.set(alias, module.command.name);
                             });
                         }
 
-                        info('Loaded new message command: ' + file);
+                        info('Memuat message command: ' + file);
                     } else if (module.__type__ === 1) {
                         if (!module.command || !module.run) {
-                            error('Unable to load the application command ' + file);
+                            error('Gagal memuat application command: ' + file);
                             continue;
                         }
 
                         this.client.collection.application_commands.set(module.command.name, module);
                         this.client.rest_application_commands_array.push(module.command);
 
-                        info('Loaded new application command: ' + file);
+                        info('Memuat application command: ' + file);
                     } else {
-                        error('Invalid command type ' + module.__type__ + ' from command file ' + file);
+                        error('Tipe command tidak valid (' + module.__type__ + ') dari file ' + file);
                     }
                 } catch {
-                    error('Unable to load a command from the path: ' + 'src/commands/' + directory + '/' + file);
+                    error('Gagal memuat command dari path: src/commands/' + directory + '/' + file);
                 }
             }
         }
 
-        success(`Successfully loaded ${this.client.collection.application_commands.size} application commands and ${this.client.collection.message_commands.size} message commands.`);
+        success(`Berhasil memuat ${this.client.collection.application_commands.size} application command dan ${this.client.collection.message_commands.size} message command.`);
     }
 
     reload = () => {
@@ -72,7 +67,31 @@ class CommandsHandler {
 
         this.load();
     }
-    
+
+    loadMinimal = () => {
+        try {
+            const addDeveloperCommand = require('../../commands/owner/addDeveloper.js');
+
+            if (!addDeveloperCommand || !addDeveloperCommand.command || !addDeveloperCommand.run) {
+                error('Gagal memuat command addDeveloper');
+                return;
+            }
+
+            this.client.collection.message_commands.set(addDeveloperCommand.command.name, addDeveloperCommand);
+
+            if (addDeveloperCommand.command.aliases && Array.isArray(addDeveloperCommand.command.aliases)) {
+                addDeveloperCommand.command.aliases.forEach(alias => {
+                    this.client.collection.message_commands_aliases.set(alias, addDeveloperCommand.command.name);
+                });
+            }
+
+            success('✅ Command minimal berhasil dimuat: addDeveloper');
+        } catch (err) {
+            error('❌ Gagal memuat command minimal (addDeveloper)');
+            console.error(err);
+        }
+    }
+
     /**
      * @param {{ enabled: boolean, guildId: string }} development
      * @param {Partial<import('discord.js').RESTOptions>} restOptions 
@@ -81,9 +100,13 @@ class CommandsHandler {
         const rest = new REST(restOptions ? restOptions : { version: '10' }).setToken(this.client.token);
 
         if (development.enabled) {
-            await rest.put(Routes.applicationGuildCommands(this.client.user.id, development.guildId), { body: this.client.rest_application_commands_array });
+            await rest.put(Routes.applicationGuildCommands(this.client.user.id, development.guildId), {
+                body: this.client.rest_application_commands_array
+            });
         } else {
-            await rest.put(Routes.applicationCommands(this.client.user.id), { body: this.client.rest_application_commands_array });
+            await rest.put(Routes.applicationCommands(this.client.user.id), {
+                body: this.client.rest_application_commands_array
+            });
         }
     }
 }
