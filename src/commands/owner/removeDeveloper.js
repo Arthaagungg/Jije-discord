@@ -49,7 +49,7 @@ module.exports = new MessageCommand({
             return message.reply({ embeds: [embed] });
         }
 
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             embed.setDescription("⚠️ User tersebut tidak terdaftar sebagai developer di server ini.");
             return message.reply({ embeds: [embed] });
         }
