@@ -10,6 +10,9 @@ module.exports = new MessageCommand({
         description: "Menambahkan developer baru ke dalam database Supabase.",
         aliases: []
     },
+  options: {
+    botOwner: true,
+  },
 
     /**
      * 
@@ -19,11 +22,6 @@ module.exports = new MessageCommand({
      */
     run: async (client, message, args) => {
         const embed = new EmbedBuilder().setColor("Red");
-
-        if (message.author.id !== config.users.ownerId) {
-            embed.setDescription("❌ Kamu bukan owner bot.");
-            return message.reply({ embeds: [embed] });
-        }
 
         const mention = message.mentions.users.first();
         if (!mention) {
