@@ -9,6 +9,9 @@ module.exports = new MessageCommand({
         description: "Menampilkan daftar developer yang terdaftar di database Supabase.",
         aliases: []
     },
+  options: {
+    botOwner: true,
+  },
 
     /**
      * 
