@@ -10,7 +10,7 @@ module.exports = new MessageCommand({
     aliases: [],
   },
   options: {
-    owner: true,
+    guildOwner: true,
   },
 
   /**
