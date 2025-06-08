@@ -26,6 +26,7 @@ const config = {
         CHANNEL_NOT_NSFW: 'Kamu tidak bisa menjalankan perintah ini di channel non-NSFW!',
         MISSING_PERMISSIONS: 'Kamu tidak memiliki izin untuk menjalankan perintah ini, ada permission yang kurang.',
         COMPONENT_NOT_PUBLIC: 'Kamu bukan pembuat tombol ini!',
+        NOT_DEVELOPER_CHANNEL: 'Kamu tidak bisa menjalankan perintah ini di dalam channel ini, silahkan menjalankan di dalam channel maintenance bot.'
         GUILD_COOLDOWN: 'Kamu sedang dalam masa cooldown, kamu bisa menggunakan perintah ini lagi dalam \`%cooldown%s\`.'
     }
 }
