@@ -1,7 +1,7 @@
 const { EmbedBuilder, Message } = require("discord.js");
 const DiscordBot = require("../../../client/DiscordBot");
 const MessageCommand = require("../../../structure/MessageCommand");
-const supabase = require("../../../modules/supabase");
+const supabase = require("../../../utils/supabase");
 
 module.exports = new MessageCommand({
   command: {
