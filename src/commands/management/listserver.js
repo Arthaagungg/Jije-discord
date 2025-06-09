@@ -2,6 +2,7 @@ const { EmbedBuilder, Message } = require("discord.js");
 const MessageCommand = require("../../structure/MessageCommand");
 const DiscordBot = require("../../client/DiscordBot");
 const supabase = require("../../utils/supabase");
+const isMainBot = require('../../utils/isMainBot');
 
 module.exports = new MessageCommand({
   command: {
@@ -18,7 +19,7 @@ module.exports = new MessageCommand({
    * @param {Message} message 
    */
   run: async (client, message) => {
-    if (!client.isMainBot()) {
+    if (!isMainBot(client.user.id)) {
       return message.reply({ content: "❌ Command ini hanya bisa dijalankan oleh **Bot Utama**.", ephemeral: true });
     }
 
