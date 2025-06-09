@@ -7,7 +7,7 @@ const isMainBot = require('../../utils/isMainBot');
 module.exports = new MessageCommand({
   command: {
     name: "listserverfeatures",
-    description: "Melihat daftar fitur bot per server.",
+    description: "Menampilkan semua fitur per server dari semua bot.",
     aliases: ['lsf']
   },
   options: {
@@ -23,21 +23,29 @@ module.exports = new MessageCommand({
       return message.reply({ content: "❌ Command ini hanya bisa dijalankan oleh **Bot Utama**.", ephemeral: true });
     }
 
-    const { data, error } = await supabase
-      .from("features")
-      .select("*")
-      .eq("guild_id", message.guild.id);
+    const { data, error } = await supabase.from("features").select("*");
 
     if (error || !data.length) {
-      return message.reply("⚠️ Tidak ada fitur yang terdaftar di server ini.");
+      return message.reply("⚠️ Tidak ada fitur yang ditemukan di database.");
+    }
+
+    // Kelompokkan berdasarkan guild_id dan bot_id
+    const grouped = {};
+    for (const row of data) {
+      const key = `${row.guild_id} | ${row.bot_id}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(`• \`${row.feature}\` — ${row.enabled ? "✅ Aktif" : "❌ Nonaktif"}`);
     }
 
     const embed = new EmbedBuilder()
-      .setTitle(`📋 Daftar Fitur di ${message.guild.name}`)
-      .setColor("Blue")
-      .setDescription(data.map(row => 
-        `**Bot ID:** \`${row.bot_id}\`\n**Fitur:** \`${row.feature}\`\n**Aktif:** ${row.enabled ? "✅" : "❌"}\n`
-      ).join("\n---\n"));
+      .setTitle("📊 Daftar Fitur Per Server")
+      .setColor("Blurple");
+
+    const description = Object.entries(grouped).map(([key, features]) => {
+      return `### 🏷️ ${key}\n${features.join("\n")}`;
+    }).join("\n\n");
+
+    embed.setDescription(description.length < 4000 ? description : "📄 Terlalu banyak data untuk ditampilkan.");
 
     return message.reply({ embeds: [embed] });
   }
