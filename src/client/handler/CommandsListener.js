@@ -1,34 +1,38 @@
 const { PermissionsBitField, ChannelType } = require("discord.js");
-const DiscordBot = require("../DiscordBot");
 const config = require("../../config");
 const MessageCommand = require("../../structure/MessageCommand");
-const ApplicationCommand = require("../../structure/ApplicationCommand");
-const { handleMessageCommandOptions, handleApplicationCommandOptions } = require("./CommandOptions");
+const { handleMessageCommandOptions } = require("./CommandOptions");
 const { error } = require("../../utils/Console");
 const supabase = require("../../utils/supabase");
 
+/**
+ * @param {import("../DiscordBot")} client
+ */
 class CommandsListener {
-  /**
-   * @param {DiscordBot} client
-   */
   constructor(client) {
-    // ===== MESSAGE COMMANDS =====
-    client.on('messageCreate', async (message) => {
+    client.on("messageCreate", async (message) => {
       if (message.author.bot || message.channel.type === ChannelType.DM) return;
       if (!config.commands.message_commands) return;
 
       let prefix = config.commands.prefix;
-      if (client.database.has('prefix-' + message.guild.id)) {
-        prefix = client.database.get('prefix-' + message.guild.id);
+      const guildId = message.guild?.id;
+      const userId = message.author.id;
+      const botId = client.user.id;
+
+      // Ambil prefix custom dari local database
+      if (client.database.has("prefix-" + guildId)) {
+        prefix = client.database.get("prefix-" + guildId);
       }
 
       if (!message.content.startsWith(prefix)) return;
 
       const args = message.content.slice(prefix.length).trim().split(/\s+/g);
-      const commandInput = args.shift().toLowerCase();
-      if (!commandInput.length) return;
+      const commandInput = args.shift()?.toLowerCase();
+      if (!commandInput?.length) return;
 
-      /** @type {MessageCommand['data']} */
+      /**
+       * @type {MessageCommand['data']}
+       */
       const command =
         client.collection.message_commands.get(commandInput) ||
         client.collection.message_commands.get(client.collection.message_commands_aliases.get(commandInput));
@@ -36,71 +40,64 @@ class CommandsListener {
       if (!command) return;
 
       try {
-        // Opsi tambahan
+        // 🔒 Handle opsi & validasi command
         if (command.options) {
           const commandContinue = await handleMessageCommandOptions(message, command.options, command.command);
           if (!commandContinue) return;
         }
 
-        // Cek permission
-        if (command.command?.permissions && !message.member.permissions.has(PermissionsBitField.resolve(command.command.permissions))) {
-          return message.reply({
+        // 🔐 Permission Discord
+        if (
+          command.command?.permissions &&
+          !message.member.permissions.has(PermissionsBitField.resolve(command.command.permissions))
+        ) {
+          await message.reply({
             content: config.messages.MISSING_PERMISSIONS,
-            ephemeral: true
+            ephemeral: true,
           });
+          return;
         }
 
-        // ✅ CEK FITUR: Apakah command ini butuh fitur aktif
+        // ⚙️ Cek fitur command jika menggunakan fitur
         if (command.options?.feature) {
-          const { data, error } = await supabase
+          const featureName = command.options.feature;
+
+          const { data: featureData, error: featureError } = await supabase
             .from("features")
             .select("enabled")
-            .eq("guild_id", message.guild.id)
-            .eq("bot_id", client.user.id)
-            .eq("feature", command.options.feature)
+            .eq("guild_id", guildId)
+            .eq("bot_id", botId)
+            .eq("feature", featureName)
             .single();
 
-          const isDeveloper = client.developers?.includes(message.author.id);
+          const fiturDinonaktifkan = featureError || !featureData || !featureData.enabled;
 
-          if (error || !data || !data.enabled) {
+          if (fiturDinonaktifkan) {
+            // 👨‍💻 Cek apakah user adalah developer dari Supabase
+            const { data: developerData, error: developerError } = await supabase
+              .from("developers")
+              .select("user_id")
+              .eq("guild_id", guildId)
+              .eq("bot_id", botId)
+              .eq("user_id", userId)
+              .maybeSingle();
+
+            const isDeveloper = developerData && !developerError;
+
             if (isDeveloper) {
               return message.reply({
-                content: `⚠️ Fitur \`${command.options.feature}\` sedang dinonaktifkan di server ini.\nSilakan hubungi <@${config.users.ownerId}> untuk mengaktifkannya.`,
-                ephemeral: true
+                content: `⚠️ Fitur \`${featureName}\` sedang dinonaktifkan di server ini.\nSilahkan hubungi <@${config.users.ownerId}> untuk mengaktifkannya.`,
+                ephemeral: true,
               });
             }
 
-            // Jika bukan developer, jangan kirim balasan
+            // ❌ Bukan developer — tidak beri balasan apa pun
             return;
           }
         }
 
-        // ✅ Semua valid → Jalankan command
+        // ✅ Jalankan command
         command.run(client, message, args);
-      } catch (err) {
-        error(err);
-      }
-    });
-
-    // ===== APPLICATION (SLASH) COMMANDS =====
-    client.on('interactionCreate', async (interaction) => {
-      if (!interaction.isCommand()) return;
-
-      if (!config.commands.application_commands.chat_input && interaction.isChatInputCommand()) return;
-      if (!config.commands.application_commands.user_context && interaction.isUserContextMenuCommand()) return;
-      if (!config.commands.application_commands.message_context && interaction.isMessageContextMenuCommand()) return;
-
-      /** @type {ApplicationCommand['data']} */
-      const command = client.collection.application_commands.get(interaction.commandName);
-      if (!command) return;
-
-      try {
-        if (command.options) {
-          const commandContinue = await handleApplicationCommandOptions(interaction, command.options, command.command);
-          if (!commandContinue) return;
-        }
-
-        command.run(client, interaction);
       } catch (err) {
         error(err);
       }
