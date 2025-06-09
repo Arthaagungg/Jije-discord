@@ -1,4 +1,12 @@
-const { Message, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionsBitField } = require('discord.js');
+const {
+  Message,
+  ChannelType,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  EmbedBuilder,
+  PermissionsBitField
+} = require('discord.js');
 const MessageCommand = require("../../structure/MessageCommand");
 const DiscordBot = require("../../client/DiscordBot");
 
@@ -11,49 +19,69 @@ module.exports = new MessageCommand({
   },
   options: {
     cooldown: 5000,
-    botDevelopers : true,
+    botDevelopers: true,
   },
 
   /**
-   * 
    * @param {DiscordBot} client 
    * @param {Message} message 
    * @param {string[]} args 
    */
   run: async (client, message, args) => {
+    const guild = message.guild;
+    const guildId = guild.id;
 
-    const guildId = message.guild.id;
-    const existing = await client.supabase
+    const { data: existing, error } = await supabase
       .from('confession_settings')
       .select('*')
       .eq('guild_id', guildId)
       .single();
 
-    if (existing.data) {
-      const confirmMsg = await message.reply('⚠️ Sistem confession sudah di-setup sebelumnya. Ingin mengganti pengaturannya? (ya/tidak)');
-      const filter = m => m.author.id === message.author.id && ['ya', 'tidak'].includes(m.content.toLowerCase());
-      const collected = await message.channel.awaitMessages({ filter, max: 1, time: 15000 });
-
-      const response = collected.first()?.content.toLowerCase();
-      if (!response || response === 'tidak') return message.reply('❌ Setup confession dibatalkan.');
+    if (error && error.code !== 'PGRST116') {
+      console.error(error);
+      return message.reply('❌ Gagal mengambil data dari database.');
     }
 
-    const channel = await message.guild.channels.create({
+    if (existing) {
+      await message.reply('⚠️ Sistem confession sudah ada. Ingin mengganti pengaturannya? (ya/tidak)');
+      try {
+        const collected = await message.channel.awaitMessages({
+          filter: m => m.author.id === message.author.id && ['ya', 'tidak'].includes(m.content.toLowerCase()),
+          max: 1,
+          time: 15000
+        });
+
+        const reply = collected.first()?.content.toLowerCase();
+        if (!reply || reply === 'tidak') {
+          return message.reply('❌ Setup confession dibatalkan.');
+        }
+
+        // Hapus channel lama jika ada
+        const oldChannel = guild.channels.cache.get(existing.channel_id);
+        if (oldChannel) await oldChannel.delete().catch(() => null);
+      } catch {
+        return message.reply('❌ Tidak ada respon. Setup confession dibatalkan.');
+      }
+    }
+
+    // Buat channel baru
+    const channel = await guild.channels.create({
       name: 'confession',
       type: ChannelType.GuildText,
       permissionOverwrites: [
         {
-          id: message.guild.roles.everyone,
+          id: guild.roles.everyone,
           allow: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ViewChannel]
         }
-      ]
+      ],
+      reason: 'Setup confession bot'
     });
 
     const embed = new EmbedBuilder()
       .setColor(0x5865F2)
       .setTitle('💌 Anonymous Confession')
       .setDescription('Klik tombol di bawah untuk mengirimkan confession secara anonim.')
-      .setFooter({ text: 'Setup Confession', iconURL: message.guild.iconURL({ dynamic: true }) })
+      .setFooter({ text: guild.name, iconURL: guild.iconURL({ dynamic: true }) })
       .setTimestamp();
 
     const row = new ActionRowBuilder().addComponents(
@@ -66,7 +94,7 @@ module.exports = new MessageCommand({
 
     await channel.send({ embeds: [embed], components: [row] });
 
-    const upsert = await client.supabase.from('confession_settings').upsert({
+    const { error: upsertError } = await client.supabase.from('confession_settings').upsert({
       guild_id: guildId,
       channel_id: channel.id,
       button_label: 'Write Confession',
@@ -74,12 +102,12 @@ module.exports = new MessageCommand({
       button_style: 'Primary',
       embed_title: '💌 Anonymous Confession',
       embed_description: 'Klik tombol di bawah untuk mengirimkan confession secara anonim.',
-      footer_text: 'Setup Confessions',
-      footer_icon: message.guild.iconURL({ dynamic: true })
+      footer_text: guild.name,
+      footer_icon: guild.iconURL({ dynamic: true })
     });
 
-    if (upsert.error) {
-      console.error(upsert.error);
+    if (upsertError) {
+      console.error(upsertError);
       return message.reply('❌ Gagal menyimpan pengaturan confession ke database.');
     }
 
