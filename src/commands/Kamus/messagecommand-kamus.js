@@ -9,6 +9,10 @@ module.exports = new MessageCommand({
         description: 'Menampilkan seluruh isi kamus.\nContoh: `jjkamus`',
         aliases: []
     },
+    options: {
+    cooldown: 5000,
+    feature: 'kamus'
+  },
 
     /**
      * 
