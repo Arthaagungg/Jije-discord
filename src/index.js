@@ -2,6 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const express = require('express');
 const DiscordBot = require('./client/DiscordBot');
+const config = require('./config');
 
 // Clear terminal log
 fs.writeFileSync('./terminal.log', '', 'utf-8');
@@ -18,12 +19,18 @@ app.listen(PORT, () => {
   console.log(`Keep-alive server running on port ${PORT}`);
 });
 
-// Inisialisasi bot
-const client = new DiscordBot();
-module.exports = client;
+// Multi-bot launcher
+const bots = [];
 
-client.connect();
+for (const botConfig of config.bots) {
+  const bot = new DiscordBot(botConfig);
+  bots.push(bot);
+  bot.connect();
+}
 
-// Tangani error agar tidak crash
+// Optional: export semua bot
+module.exports = bots;
+
+// Tangani error global
 process.on('unhandledRejection', console.error);
 process.on('uncaughtException', console.error);
