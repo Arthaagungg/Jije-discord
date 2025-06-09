@@ -9,6 +9,7 @@ const {
 } = require('discord.js');
 const MessageCommand = require("../../structure/MessageCommand");
 const DiscordBot = require("../../client/DiscordBot");
+const supabase = require("../../utils/supabase");
 
 module.exports = new MessageCommand({
   command: {
