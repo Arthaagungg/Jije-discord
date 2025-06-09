@@ -7,7 +7,7 @@ module.exports = new MessageCommand({
   command: {
     name: "listserverfeatures",
     description: "Melihat daftar fitur bot per server.",
-    aliases: [lsf]
+    aliases: ['lsf']
   },
   options: {
     botDevelopers: true,
