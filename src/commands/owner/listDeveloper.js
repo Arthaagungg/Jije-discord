@@ -1,31 +1,31 @@
-const { Message, EmbedBuilder } = require("discord.js");
+const { ChatInputCommandInteraction, EmbedBuilder } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
-const MessageCommand = require("../../structure/MessageCommand");
+const ApplicationCommand = require("../../structure/ApplicationCommand");
 const supabase = require("../../utils/supabase");
 
-module.exports = new MessageCommand({
+module.exports = new ApplicationCommand({
     command: {
-        name: "listdevelopers",
-        description: "Menampilkan daftar developer yang terdaftar di database Supabase.",
-        aliases: []
+        name: 'listdevelopers',
+        description: 'Menampilkan daftar developer yang terdaftar di database Supabase.',
+        type: 1,
+        options: []
     },
-  options: {
-    botOwner: true,
-  },
+    options: {
+        botOwner: true
+    },
 
     /**
      * 
      * @param {DiscordBot} client 
-     * @param {Message} message 
-     * @param {string[]} args 
+     * @param {ChatInputCommandInteraction} interaction 
      */
-    run: async (client, message, args) => {
-        const guildId = message.guild?.id;
+    run: async (client, interaction) => {
+        const guildId = interaction.guild?.id;
         const embed = new EmbedBuilder().setColor("Blue");
 
         if (!guildId) {
             embed.setDescription("❗ Gagal mendeteksi guild ID.");
-            return message.reply({ embeds: [embed] });
+            return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
         const { data, error } = await supabase
@@ -36,12 +36,12 @@ module.exports = new MessageCommand({
         if (error) {
             console.error(error);
             embed.setDescription("❌ Gagal mengambil data developer dari database.");
-            return message.reply({ embeds: [embed] });
+            return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
         if (!data || data.length === 0) {
             embed.setDescription("📭 Belum ada developer yang terdaftar di server ini.");
-            return message.reply({ embeds: [embed] });
+            return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
         const devList = data.map((d, i) => `\`${i + 1}.\` <@${d.user_id}>`).join("\n");
@@ -50,6 +50,6 @@ module.exports = new MessageCommand({
             .setTitle("📋 Daftar Developer")
             .setDescription(devList);
 
-        message.reply({ embeds: [embed] });
+        interaction.reply({ embeds: [embed] });
     }
-});
+}).toJSON();
