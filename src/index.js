@@ -4,10 +4,10 @@ const express = require('express');
 const DiscordBot = require('./client/DiscordBot');
 const config = require('./config');
 
-// Clear terminal log
+// Bersihkan terminal.log
 fs.writeFileSync('./terminal.log', '', 'utf-8');
 
-// Buat server Express untuk keep-alive
+// Setup server Express untuk keep-alive
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -19,18 +19,24 @@ app.listen(PORT, () => {
   console.log(`Keep-alive server running on port ${PORT}`);
 });
 
-// Multi-bot launcher
+// Simpan semua instance bot di sini
 const bots = [];
 
+// Jalankan semua bot dari config
 for (const botConfig of config.bots) {
-  const bot = new DiscordBot(botConfig);
-  bots.push(bot);
-  bot.connect();
+  if (!botConfig.token || !/^([MN][A-Za-z\d]{23})\.([A-Za-z\d-_]{6})\.([A-Za-z\d-_]{27})$/.test(botConfig.token)) {
+    console.warn(`⚠️  Token tidak valid atau kosong untuk bot "${botConfig.name}", dilewati.`);
+    continue;
+  }
+
+  const client = new DiscordBot(botConfig); // berikan konfigurasi spesifik bot
+  bots.push(client);
+  client.connect();
 }
 
-// Optional: export semua bot
-module.exports = bots;
-
-// Tangani error global
+// Tangani error agar tidak crash
 process.on('unhandledRejection', console.error);
 process.on('uncaughtException', console.error);
+
+// Optional: Export semua bots jika perlu digunakan di luar
+module.exports = bots;
