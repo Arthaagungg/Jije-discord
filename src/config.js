@@ -32,7 +32,7 @@ const config = {
   bots: [
     {
       name: 'Bot Utama',
-      id: '1381217549819314239',
+      clientId: '1381217549819314239',
       token: process.env.BOT1_TOKEN,
       status: [
         { name: 'Bot Utama Aktif 🤖', type: 0 },
@@ -41,7 +41,7 @@ const config = {
     },
     {
       name: 'Bot Kedua',
-      id: '1381217549819314239',
+      clientId: '13812175498194314239',
       token: process.env.BOT2_TOKEN,
       status: [
         { name: 'Bot Kedua Siaga 🛡️', type: 0 },
