@@ -1,6 +1,6 @@
 const { Client, Collection, Partials } = require("discord.js");
 const CommandsHandler = require("./handler/CommandsHandler");
-const { warn, error, info, success } = require("../utils/Console");
+const { warn, error, success } = require("../utils/Console");
 const config = require("../config");
 const CommandsListener = require("./handler/CommandsListener");
 const ComponentsHandler = require("./handler/ComponentsHandler");
@@ -25,18 +25,13 @@ class DiscordBot extends Client {
     rest_application_commands_array = [];
     login_attempts = 0;
     login_timestamp = 0;
-    statusMessages = [
-        { name: 'Lagi Bearbrand 🥵', type: 4 },
-        { name: 'Mode Kalem 🫡', type: 4 },
-        { name: 'Asisten Versi 1.0', type: 4 }
-    ];
 
     commands_handler = new CommandsHandler(this);
     components_handler = new ComponentsHandler(this);
     events_handler = new EventsHandler(this);
     database = new QuickYAML(config.database.path);
 
-    constructor() {
+    constructor(botConfig) {
         super({
             intents: 3276799,
             partials: [
@@ -47,13 +42,13 @@ class DiscordBot extends Client {
                 Partials.User
             ],
             presence: {
-                activities: [{
-                    name: 'keep this empty',
-                    type: 4,
-                    state: 'DiscordJS-V14-Bot-Template v3'
-                }]
+                activities: botConfig.status?.length ? [botConfig.status[0]] : [],
+                status: 'online'
             }
         });
+
+        this.token = botConfig.token;
+        this.statusMessages = botConfig.status || [];
 
         new CommandsListener(this);
         new ComponentsListener(this);
@@ -69,6 +64,8 @@ class DiscordBot extends Client {
     }
 
     startStatusRotation = () => {
+        if (!this.statusMessages.length) return;
+
         let index = 0;
         setInterval(() => {
             this.user.setPresence({ activities: [this.statusMessages[index]] });
@@ -82,12 +79,12 @@ class DiscordBot extends Client {
         this.login_timestamp = Date.now();
 
         try {
-            await this.login(process.env.CLIENT_TOKEN);
+            await this.login(this.token);
 
             const hasDevelopers = await this.checkDevelopers();
             if (!hasDevelopers) {
                 warn('🚫 Tidak ada developer terdaftar. Memuat perintah terbatas khusus owner...');
-                this.commands_handler.loadMinimal(); // hanya !adddeveloper
+                this.commands_handler.loadMinimal();
                 return;
             }
 
