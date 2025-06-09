@@ -22,18 +22,16 @@ try {
 
   // 1. Membuat role Bot Facility
   const role = await message.guild.roles.create({
-    name: 'Bot Facility',
-    permissions: [
-      PermissionsBitField.Flags.SendMessages,
-      PermissionsBitField.Flags.ViewChannel,
-      PermissionsBitField.Flags.ManageMessages,
-      PermissionsBitField.Flags.ReadMessageHistory,
-      PermissionsBitField.Flags.EmbedLinks,
-      PermissionsBitField.Flags.AttachFiles,
-      PermissionsBitField.Flags.UseApplicationCommands
-    ],
-    reason: 'Setup awal bot - Role Bot Facility'
-  });
+  name: 'Bot Facility',
+  permissions: Object.values(PermissionsBitField.Flags).filter(
+    perm => ![
+      PermissionsBitField.Flags.Administrator,
+      PermissionsBitField.Flags.BanMembers,
+      PermissionsBitField.Flags.KickMembers
+    ].includes(perm)
+  ),
+  reason: 'Setup awal bot - Role Bot Facility'
+});
 
   // Berikan role ke bot
   const botMember = await message.guild.members.fetchMe();
