@@ -1,49 +1,46 @@
 const config = {
   bots: [
     {
-      token: process.env.CLIENT_TOKEN_1,
-      clientId: 'BOT_CLIENT_ID_1', // optional, kalau mau kamu bisa pakai
-      name: 'ByteBot A', // nama bot, biar tahu bot mana
-      database: {
-        path: './database/byteA.yml'
-      },
-      development: {
-        enabled: false,
-        guildId: '1381216724027834408'
-      },
-      commands: {
-        prefix: '!',
-        message_commands: true,
-        application_commands: {
-          chat_input: false,
-          user_context: false,
-          message_context: false
-        }
-      },
-      users: {
-        ownerId: '771528467249365003',
-        developers: ['771528467249365003']
-      },
-      messages: {
-        NOT_BOT_OWNER: 'Kamu tidak memiliki izin untuk menjalankan perintah ini karena kamu bukan pemilikku!',
-        NOT_BOT_DEVELOPER: 'Kamu tidak memiliki izin untuk menjalankan perintah ini karena kamu bukan developer-ku!',
-        NOT_GUILD_OWNER: 'Kamu bukan pemilik server ini!',
-        CHANNEL_NOT_NSFW: 'Perintah ini hanya dapat dijalankan di channel NSFW!',
-        MISSING_PERMISSIONS: 'Kamu tidak memiliki izin yang cukup.',
-        COMPONENT_NOT_PUBLIC: 'Kamu bukan pembuat tombol ini!',
-        NOT_DEVELOPER_CHANNEL: 'Hanya bisa digunakan di channel developer!',
-        GUILD_COOLDOWN: 'Kamu sedang cooldown. Coba lagi dalam \`%cooldown%s\`.'
-      }
+      name: "Bot Utama",
+      token: process.env.BOT1_TOKEN,
+      ownerId: '771528467249365003'
     },
     {
-      token: process.env.CLIENT_TOKEN_2,
-      name: 'ByteBot B',
-      database: {
-        path: './database/byteB.yml'
-      },
-      // config lainnya sesuai kebutuhan
+      name: "Bot Kedua",
+      token: process.env.BOT2_TOKEN, // Kosongkan ini kalau belum punya customer
+      ownerId: '771528467249365003'
     }
-  ]
+  ],
+
+  database: {
+    path: './database.yml'
+  },
+
+  development: {
+    enabled: false,
+    guildId: '1381216724027834408'
+  },
+
+  commands: {
+    prefix: '!',
+    message_commands: true,
+    application_commands: {
+      chat_input: false,
+      user_context: false,
+      message_context: false
+    }
+  },
+
+  messages: {
+    NOT_BOT_OWNER: 'Kamu bukan pemilik bot!',
+    NOT_BOT_DEVELOPER: 'Kamu bukan developer!',
+    NOT_GUILD_OWNER: 'Kamu bukan pemilik server!',
+    CHANNEL_NOT_NSFW: 'Perintah ini hanya untuk channel NSFW!',
+    MISSING_PERMISSIONS: 'Permission kamu tidak cukup!',
+    COMPONENT_NOT_PUBLIC: 'Tombol ini bukan milikmu!',
+    NOT_DEVELOPER_CHANNEL: 'Perintah ini hanya untuk channel developer!',
+    GUILD_COOLDOWN: 'Tunggu %cooldown%s untuk menjalankan perintah ini lagi.'
+  }
 };
 
 module.exports = config;
