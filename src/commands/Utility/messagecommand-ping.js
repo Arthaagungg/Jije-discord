@@ -1,6 +1,7 @@
 const { Message } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const MessageCommand = require("../../structure/MessageCommand");
+const supabase = require("../../utils/supabase");
 
 module.exports = new MessageCommand({
     command: {
@@ -10,28 +11,45 @@ module.exports = new MessageCommand({
         permissions: ['SendMessages']
     },
     options: {
-        cooldown: 5000
+        cooldown: 5000,
+        feature: 'ping' // ✅ Nama fitur ini
     },
+
     /**
      * @param {DiscordBot} client 
      * @param {Message} message 
      * @param {string[]} args
      */
     run: async (client, message, args) => {
-        const ping = client.ws.ping;
+        // ✅ Cek ke database apakah fitur diaktifkan
+        const { data, error } = await supabase
+            .from("features")
+            .select("enabled")
+            .eq("guild_id", message.guild.id)
+            .eq("bot_id", client.user.id)
+            .eq("feature", 'ping') // sesuai nama fiturnya
+            .single();
 
-        // Tentukan status dan warna
+        if (error || !data || !data.enabled) {
+            return message.reply({
+                content: "❌ Fitur `ping` sedang dinonaktifkan di server ini.",
+                ephemeral: true
+            });
+        }
+
+        // ✅ Jika aktif, lanjutkan normal
+        const ping = client.ws.ping;
         let status = '🟢 Sangat Cepat';
-        let color = 0x43B581; // Hijau
+        let color = 0x43B581;
 
         if (ping > 200) {
             status = '🟡 Cukup Stabil';
-            color = 0xFAA61A; // Kuning
+            color = 0xFAA61A;
         }
 
         if (ping > 400) {
             status = '🔴 Sangat Lambat';
-            color = 0xF04747; // Merah
+            color = 0xF04747;
         }
 
         await message.reply({
