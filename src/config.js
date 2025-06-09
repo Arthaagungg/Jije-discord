@@ -1,34 +1,49 @@
 const config = {
-    database: {
-        path: './database.yml' // Lokasi file database yang digunakan bot.
-    },
-    development: {
-        enabled: false, // Jika true, bot akan mendaftarkan semua perintah hanya ke server tertentu (bukan global).
-        guildId: '1381216724027834408' // ID server tujuan untuk mode pengembangan.
-    },
-    commands: {
-        prefix: '!', // Prefix untuk perintah berbasis pesan. Dapat diubah melalui database.
-        message_commands: true, // Jika true, bot akan mengizinkan perintah melalui pesan (prefix command).
+  bots: [
+    {
+      token: process.env.CLIENT_TOKEN_1,
+      clientId: 'BOT_CLIENT_ID_1', // optional, kalau mau kamu bisa pakai
+      name: 'ByteBot A', // nama bot, biar tahu bot mana
+      database: {
+        path: './database/byteA.yml'
+      },
+      development: {
+        enabled: false,
+        guildId: '1381216724027834408'
+      },
+      commands: {
+        prefix: '!',
+        message_commands: true,
         application_commands: {
-            chat_input: false, // Jika true, bot akan mengizinkan perintah berbasis slash (/).
-            user_context: false, // Jika true, bot akan mengizinkan perintah dari menu konteks pengguna.
-            message_context: false // Jika true, bot akan mengizinkan perintah dari menu konteks pesan.
+          chat_input: false,
+          user_context: false,
+          message_context: false
         }
-    },
-    users: {
-        ownerId: '771528467249365003', // ID pemilik bot (kamu).
-        developers: ['771528467249365003'] // Daftar ID developer bot, pastikan ID kamu termasuk di sini.
-    },
-    messages: { // Konfigurasi pesan balasan saat menjalankan perintah.
+      },
+      users: {
+        ownerId: '771528467249365003',
+        developers: ['771528467249365003']
+      },
+      messages: {
         NOT_BOT_OWNER: 'Kamu tidak memiliki izin untuk menjalankan perintah ini karena kamu bukan pemilikku!',
         NOT_BOT_DEVELOPER: 'Kamu tidak memiliki izin untuk menjalankan perintah ini karena kamu bukan developer-ku!',
-        NOT_GUILD_OWNER: 'Kamu tidak memiliki izin untuk menjalankan perintah ini karena kamu bukan pemilik server!',
-        CHANNEL_NOT_NSFW: 'Kamu tidak bisa menjalankan perintah ini di channel non-NSFW!',
-        MISSING_PERMISSIONS: 'Kamu tidak memiliki izin untuk menjalankan perintah ini, ada permission yang kurang.',
+        NOT_GUILD_OWNER: 'Kamu bukan pemilik server ini!',
+        CHANNEL_NOT_NSFW: 'Perintah ini hanya dapat dijalankan di channel NSFW!',
+        MISSING_PERMISSIONS: 'Kamu tidak memiliki izin yang cukup.',
         COMPONENT_NOT_PUBLIC: 'Kamu bukan pembuat tombol ini!',
-        NOT_DEVELOPER_CHANNEL: 'Kamu tidak bisa menjalankan perintah ini di dalam channel ini, silahkan menjalankan di dalam channel maintenance bot.',
-        GUILD_COOLDOWN: 'Kamu sedang dalam masa cooldown, kamu bisa menggunakan perintah ini lagi dalam \`%cooldown%s\`.'
+        NOT_DEVELOPER_CHANNEL: 'Hanya bisa digunakan di channel developer!',
+        GUILD_COOLDOWN: 'Kamu sedang cooldown. Coba lagi dalam \`%cooldown%s\`.'
+      }
+    },
+    {
+      token: process.env.CLIENT_TOKEN_2,
+      name: 'ByteBot B',
+      database: {
+        path: './database/byteB.yml'
+      },
+      // config lainnya sesuai kebutuhan
     }
-}
+  ]
+};
 
 module.exports = config;
