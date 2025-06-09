@@ -24,7 +24,7 @@ const bots = [];
 
 // Jalankan semua bot dari config
 for (const botConfig of config.bots) {
-  if (!botConfig.token || !/^([MN][A-Za-z\d]{23})\.([A-Za-z\d-_]{6})\.([A-Za-z\d-_]{27})$/.test(botConfig.token)) {
+  if (!botConfig.token ) {
     console.warn(`⚠️  Token tidak valid atau kosong untuk bot "${botConfig.name}", dilewati.`);
     continue;
   }
