@@ -1,6 +1,8 @@
-const config = require('../config');
+const config = require("../config");
 
-module.exports = function isMainBot(botId) {
-  const mainBot = config.bots[0]; // asumsikan bot utama ada di index ke-0
-  return botId === mainBot.id;
-};
+function isMainBot(botId) {
+  const mainBotId = config.bots[0]?.clientId; // Bot Utama harus ada clientId
+  return botId === mainBotId;
+}
+
+module.exports = isMainBot;
