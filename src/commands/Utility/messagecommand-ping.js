@@ -22,41 +22,7 @@ module.exports = new MessageCommand({
    * @param {string[]} args
    */
   run: async (client, message, args) => {
-    const featureName = 'ping';
-    const guildId = message.guild.id;
-    const botId = client.user.id;
-    const userId = message.author.id;
-
-    // 1. Cek apakah fitur aktif
-    const { data: featureData, error: featureError } = await supabase
-      .from("features")
-      .select("enabled")
-      .eq("guild_id", guildId)
-      .eq("bot_id", botId)
-      .eq("feature", featureName)
-      .single();
-
-    if (featureError || !featureData || !featureData.enabled) {
-      // 2. Cek apakah user adalah developer
-      const { data: devData } = await supabase
-        .from("developers")
-        .select("user_id")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      const isDeveloper = !!devData;
-      const ownerId = config.users.ownerId;
-
-      if (isDeveloper) {
-        return message.reply({
-          content: `❌ Fitur \`${featureName}\` sedang dinonaktifkan di server ini.\nSilakan hubungi <@${ownerId}> untuk mengaktifkan fitur tersebut.`,
-          ephemeral: true
-        });
-      }
-
-      // Selain developer: tidak ada balasan sama sekali
-      return;
-    }
+    
 
     // ✅ Lanjutkan kalau fitur aktif
     const ping = client.ws.ping;
